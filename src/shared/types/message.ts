@@ -18,8 +18,10 @@ export interface ProblemDetectedPayload {
 export type SubmissionVerdict = "accepted" | "failed";
 
 export interface AttemptSubmittedPayload {
+  submissionId?: string;
   problemId: string;
   verdict: SubmissionVerdict;
+  metadata?: ProblemDetectedPayload;
 }
 
 

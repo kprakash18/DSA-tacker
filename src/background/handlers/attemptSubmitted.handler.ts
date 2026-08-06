@@ -1,6 +1,11 @@
 import { problemRepository } from "../../storage/ProblemRepository";
 
-import type { AttemptSubmittedPayload } from "../../shared/types";
+import type {
+  AttemptSubmittedPayload,
+  Platform,
+  Problem,
+  ProblemDetectedPayload,
+} from "../../shared/types";
 
 export async function handleAttemptSubmitted(
   payload: AttemptSubmittedPayload
@@ -11,8 +16,46 @@ export async function handleAttemptSubmitted(
   }
 
   try {
+    const existingProblem = await problemRepository.findById(payload.problemId);
+
+    if (!existingProblem) {
+      // Retrieve metadata fallback from payload or chrome.storage.session
+      let metadata: ProblemDetectedPayload | null = payload.metadata ?? null;
+
+      if (!metadata) {
+        const sessionStore = await chrome.storage.session.get(payload.problemId);
+        metadata = (sessionStore[payload.problemId] as ProblemDetectedPayload) ?? null;
+      }
+
+      const now = Date.now();
+      const parts = payload.problemId.split(":");
+      const platform = (metadata?.platform ?? parts[0] ?? "leetcode") as Platform;
+      const slug = metadata?.slug ?? parts[1] ?? "";
+
+      const newProblem: Problem = {
+        id: payload.problemId,
+        platform,
+        slug,
+        title: metadata?.title ?? slug,
+        url: metadata?.url ?? `https://leetcode.com/problems/${slug}/`,
+        difficulty: metadata?.difficulty ?? "unknown",
+        tags: metadata?.tags ?? [],
+        status: "open",
+        attempts: 0,
+        firstSeenAt: now,
+        lastOpenedAt: now,
+        lastAttemptAt: null,
+        notes: "",
+      };
+
+      await problemRepository.save(newProblem);
+    }
+
     await problemRepository.updateAttempt(payload.problemId, payload.verdict);
-    console.log("Updated submission attempt:", payload.problemId, payload.verdict);
+    console.log("Submission recorded:", {
+      problemId: payload.problemId,
+      verdict: payload.verdict,
+    });
   } catch (error) {
     console.error("Failed to process submission attempt:", error);
   }

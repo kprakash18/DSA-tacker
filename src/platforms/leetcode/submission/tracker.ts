@@ -1,0 +1,121 @@
+import { MESSAGE_TYPES } from "../../../shared/messages";
+import { getCurrentProblemId, getCurrentProblemMetadata } from "../observer";
+import { attachSubmitListener, detachSubmitListener } from "./listener";
+import { extractVerdict } from "./verdict";
+
+type SubmissionState = "idle" | "waiting" | "completed";
+
+export interface SubmissionTracker {
+  dispose(): void;
+}
+
+export function startSubmissionTracker(): SubmissionTracker {
+  let state: SubmissionState = "idle";
+  let activeSubmissionId: string | null = null;
+  let pollingInterval: number | null = null;
+  let pollingTimeout: number | null = null;
+  let buttonCheckInterval: number | null = null;
+
+  function stopPolling(): void {
+    if (pollingInterval !== null) {
+      window.clearInterval(pollingInterval);
+      pollingInterval = null;
+    }
+
+    if (pollingTimeout !== null) {
+      window.clearTimeout(pollingTimeout);
+      pollingTimeout = null;
+    }
+
+    state = "idle";
+    activeSubmissionId = null;
+  }
+
+  function startPolling(): void {
+    if (state === "waiting") {
+      return;
+    }
+
+    state = "waiting";
+    activeSubmissionId = crypto.randomUUID();
+
+    pollingInterval = window.setInterval(() => {
+      if (state !== "waiting") {
+        stopPolling();
+        return;
+      }
+
+      const verdict = extractVerdict();
+
+      if (!verdict) {
+        return;
+      }
+
+      const problemId = getCurrentProblemId();
+
+      if (!problemId) {
+        console.warn("No active problem detected during submission");
+        stopPolling();
+        return;
+      }
+
+      const metadata = getCurrentProblemMetadata();
+      const submissionId = activeSubmissionId ?? crypto.randomUUID();
+
+      stopPolling();
+      state = "completed";
+
+      try {
+        chrome.runtime.sendMessage({
+          type: MESSAGE_TYPES.ATTEMPT_SUBMITTED,
+          payload: {
+            submissionId,
+            problemId,
+            verdict,
+            metadata: metadata ?? undefined,
+          },
+        });
+      } catch (error) {
+        console.error("Failed to dispatch ATTEMPT_SUBMITTED message:", error);
+      } finally {
+        state = "idle";
+      }
+    }, 200);
+
+    // 30-second safety timeout
+    pollingTimeout = window.setTimeout(() => {
+      console.warn("Submission polling timed out after 30 seconds");
+      stopPolling();
+    }, 30000);
+  }
+
+  function onSubmitClick(): void {
+    if (state === "waiting") {
+      return;
+    }
+
+    startPolling();
+  }
+
+  // Attach submit listener
+  attachSubmitListener(onSubmitClick);
+
+  // Periodically check listener attachment to handle React DOM re-renders
+  buttonCheckInterval = window.setInterval(() => {
+    attachSubmitListener(onSubmitClick);
+  }, 1000);
+
+  function dispose(): void {
+    stopPolling();
+    detachSubmitListener();
+
+    if (buttonCheckInterval !== null) {
+      window.clearInterval(buttonCheckInterval);
+      buttonCheckInterval = null;
+    }
+  }
+
+  return {
+    dispose,
+  };
+}

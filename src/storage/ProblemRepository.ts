@@ -42,8 +42,6 @@ export class ProblemRepository {
    * Creates or updates a problem.
    */
   async save(problem: Problem): Promise<void> {
-    console.log("Saving problem:", problem);
-
     const problems = await this.findAll();
 
     problems[problem.id] = problem;
@@ -108,8 +106,6 @@ export class ProblemRepository {
       return;
     }
 
-    console.log("Before update:", JSON.parse(JSON.stringify(problem)));
-
     const now = Date.now();
 
     problem.attempts += 1;
@@ -126,8 +122,6 @@ export class ProblemRepository {
         problem.status = "attempted";
       }
     }
-
-    console.log("After update:", problem);
 
     await this.save(problem);
   }

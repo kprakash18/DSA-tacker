@@ -1,18 +1,24 @@
 import { extractProblemMetadata } from "./extractor";
 import { MESSAGE_TYPES } from "../../shared/messages";
-import { attachSubmitListener } from "./submission";
+import type { ProblemDetectedPayload } from "../../shared/types";
 
 let lastProblemSlug: string | null = null;
 let currentProblemId: string | null = null;
+let currentProblemMetadata: ProblemDetectedPayload | null = null;
 
 export function getCurrentProblemId(): string | null {
   return currentProblemId;
+}
+
+export function getCurrentProblemMetadata(): ProblemDetectedPayload | null {
+  return currentProblemMetadata;
 }
 
 function detectProblem(): void {
   if (!location.pathname.startsWith("/problems/")) {
     lastProblemSlug = null;
     currentProblemId = null;
+    currentProblemMetadata = null;
     return;
   }
 
@@ -24,6 +30,7 @@ function detectProblem(): void {
 
   // Assign problem ID immediately from URL slug (URL is synchronous & reliable)
   currentProblemId = `${metadata.platform}:${metadata.slug}`;
+  currentProblemMetadata = metadata;
 
   const hasCompleteMetadata =
     metadata.title.trim() !== "" &&
@@ -40,27 +47,16 @@ function detectProblem(): void {
 
   lastProblemSlug = metadata.slug;
 
-  console.log("Before PROBLEM_DETECTED");
+  chrome.runtime.sendMessage({
+    type: MESSAGE_TYPES.PROBLEM_DETECTED,
+    payload: metadata,
+  });
 
-  chrome.runtime.sendMessage(
-    {
-      type: MESSAGE_TYPES.PROBLEM_DETECTED,
-      payload: metadata,
-    },
-    () => {
-      console.log("PROBLEM_DETECTED callback");
-      console.log("lastError:", chrome.runtime.lastError);
-    }
-  );
-
-  console.log("After PROBLEM_DETECTED");
+  console.log("Problem detected:", metadata);
 }
 
 export function startProblemObserver() {
   detectProblem();
-
-  // Attach submit listener once
-  attachSubmitListener();
 
   let timeoutId: number | undefined;
 
@@ -69,9 +65,6 @@ export function startProblemObserver() {
 
     timeoutId = window.setTimeout(() => {
       detectProblem();
-
-      // React may replace the submit button
-      attachSubmitListener();
     }, 100);
   });
 
