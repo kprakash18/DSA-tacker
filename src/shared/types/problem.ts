@@ -1,7 +1,7 @@
 export type Platform = "leetcode" | "gfg";
 
 export type Difficulty = "easy" | "medium" | "hard" | "unknown";
-export type ProblemStatus = "attempted" | "solved" | "revisit";
+export type ProblemStatus = "attempted" | "solved" | "revisit" | "open";
 
 export interface Problem {
   

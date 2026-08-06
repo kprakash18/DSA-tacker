@@ -5,15 +5,11 @@ export default defineManifest({
 
   name: "Problem Tracker",
 
-  description:
-    "Automatically track LeetCode and GeeksforGeeks problems.",
+  description: "Automatically track LeetCode and GeeksforGeeks problems.",
 
   version: "1.0.0",
 
-  permissions: [
-    "storage",
-    "sidePanel",
-  ],
+  permissions: ["storage", "sidePanel"],
 
   host_permissions: [
     "https://leetcode.com/*",
@@ -32,4 +28,11 @@ export default defineManifest({
   side_panel: {
     default_path: "sidepanel.html",
   },
+  content_scripts: [
+    {
+      matches: ["https://leetcode.com/problems/*"],
+      js: ["src/platforms/leetcode/index.ts"],
+      run_at: "document_idle",
+    },
+  ],
 });
