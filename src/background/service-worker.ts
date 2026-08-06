@@ -1,7 +1,7 @@
 import { MESSAGE_TYPES } from "../shared/messages";
 import type { RuntimeMessage } from "../shared/types";
-import { handleProblemDetected } from "./handlers/problemDetected.handler";
-import { handleAttemptSubmitted } from "./handlers/attemptSubmitted.handler";
+import { handleProblemDetected } from "./handlers/handleProblemDetected";
+import { handleAttemptSubmitted } from "./handlers/handleAttemptSubmitted";
 import { logger } from "../shared/utils/logger";
 
 logger.info("Problem Tracker Background Started");

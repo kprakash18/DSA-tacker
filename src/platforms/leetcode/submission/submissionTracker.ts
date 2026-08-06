@@ -1,8 +1,8 @@
 import { MESSAGE_TYPES } from "../../../shared/messages";
 import { logger } from "../../../shared/utils/logger";
-import { getCurrentProblemId, getCurrentProblemMetadata } from "../observer";
-import { attachSubmitListener, detachSubmitListener } from "./listener";
-import { extractVerdict } from "./verdict";
+import { getCurrentProblemId, getCurrentProblemMetadata } from "../problemObserver";
+import { attachSubmitListener, detachSubmitListener } from "./submitButtonListener";
+import { extractVerdict } from "./verdictExtractor";
 
 type SubmissionState = "idle" | "waiting" | "completed";
 

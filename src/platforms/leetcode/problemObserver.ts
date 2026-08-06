@@ -1,4 +1,4 @@
-import { extractProblemMetadata } from "./extractor";
+import { extractProblemMetadata } from "./problemExtractor";
 import { MESSAGE_TYPES } from "../../shared/messages";
 import type { ProblemDetectedPayload } from "../../shared/types";
 import { logger } from "../../shared/utils/logger";

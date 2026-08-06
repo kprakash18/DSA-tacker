@@ -1,4 +1,4 @@
-import { startProblemObserver } from "./observer";
+import { startProblemObserver } from "./problemObserver";
 import { startSubmissionTracker } from "./submission/index";
 
 startProblemObserver();

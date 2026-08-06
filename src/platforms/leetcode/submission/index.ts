@@ -1,2 +1,2 @@
-export { startSubmissionTracker } from "./tracker";
-export type { SubmissionTracker } from "./tracker";
+export { startSubmissionTracker } from "./submissionTracker";
+export type { SubmissionTracker } from "./submissionTracker";

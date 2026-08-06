@@ -1,4 +1,4 @@
-import { chromeStorage } from "./chromeStorage";
+import { chromeStorage } from "./ChromeStorage";
 
 import { STORAGE_KEYS } from "../shared/constants/storageKeys";
 

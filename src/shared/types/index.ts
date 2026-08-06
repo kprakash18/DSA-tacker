@@ -1,2 +1,2 @@
-export * from "./problem";
-export * from "./message";
+export * from "./problemTypes";
+export * from "./messageTypes";

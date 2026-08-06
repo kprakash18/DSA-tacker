@@ -2,7 +2,7 @@ import type {
   Difficulty,
   Platform,
   ProblemStatus,
-} from "./problem";
+} from "./problemTypes";
 
 import { MESSAGE_TYPES } from "../messages";
 
