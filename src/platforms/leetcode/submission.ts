@@ -1,11 +1,60 @@
+import { MESSAGE_TYPES } from "../../shared/messages";
 import type { SubmissionVerdict } from "../../shared/types";
 
-const SUBMIT_BUTTON_SELECTOR = '[data-e2e-locator="console-submit-button"]';
+const SUBMIT_BUTTON_SELECTOR =
+  '[data-e2e-locator="console-submit-button"]';
 
-const SUBMISSION_RESULT_SELECTOR = '[data-e2e-locator="submission-result"]';
+const SUBMISSION_TAB_SELECTOR = "#submission-detail_tab";
 
 let currentSubmitButton: HTMLButtonElement | null = null;
-let submissionStarted = false;
+
+let pollingInterval: number | null = null;
+let pollingTimeout: number | null = null;
+
+function startVerdictPolling(): void {
+  // Already polling
+  if (pollingInterval !== null) {
+    return;
+  }
+
+  console.log("Started verdict polling");
+
+  pollingInterval = window.setInterval(() => {
+    const verdict = extractSubmissionVerdict();
+
+    if (!verdict) {
+      return;
+    }
+
+    stopVerdictPolling();
+
+    chrome.runtime.sendMessage({
+      type: MESSAGE_TYPES.ATTEMPT_SUBMITTED,
+      payload: {
+        verdict,
+      },
+    });
+  }, 200);
+
+  // Safety timeout (30 seconds)
+  pollingTimeout = window.setTimeout(() => {
+    console.log("Submission polling timed out");
+
+    stopVerdictPolling();
+  }, 30000);
+}
+
+function stopVerdictPolling(): void {
+  if (pollingInterval !== null) {
+    window.clearInterval(pollingInterval);
+    pollingInterval = null;
+  }
+
+  if (pollingTimeout !== null) {
+    window.clearTimeout(pollingTimeout);
+    pollingTimeout = null;
+  }
+}
 
 export function attachSubmitListener(): void {
   const submitButton = document.querySelector<HTMLButtonElement>(
@@ -23,46 +72,37 @@ export function attachSubmitListener(): void {
   currentSubmitButton = submitButton;
 
   submitButton.addEventListener("click", () => {
-    submissionStarted = true;
-
     console.log("Submit button clicked");
-  });
-}
-export function isSubmissionPending(): boolean {
-  return submissionStarted;
-}
 
-export function clearSubmissionPending(): void {
-  submissionStarted = false;
+    startVerdictPolling();
+  });
 }
 
 export function extractSubmissionVerdict(): SubmissionVerdict | null {
-  if (!submissionStarted) {
-    return null;
-  }
-
-  const result = document.querySelector<HTMLElement>(
-    SUBMISSION_RESULT_SELECTOR
+  const submissionTab = document.querySelector<HTMLElement>(
+    SUBMISSION_TAB_SELECTOR
   );
 
-  if (!result) {
+  if (!submissionTab) {
     return null;
   }
 
-  const verdict = result.textContent?.trim();
+  const text = submissionTab.textContent ?? "";
 
-  switch (verdict) {
-    case "Accepted":
-      return "accepted";
-
-    case "Wrong Answer":
-    case "Runtime Error":
-    case "Time Limit Exceeded":
-    case "Memory Limit Exceeded":
-    case "Compilation Error":
-      return "failed";
-
-    default:
-      return null;
+  if (text.includes("Accepted")) {
+    return "accepted";
   }
+
+  if (
+    text.includes("Wrong Answer") ||
+    text.includes("Compile Error") ||
+    text.includes("Compilation Error") ||
+    text.includes("Runtime Error") ||
+    text.includes("Time Limit Exceeded") ||
+    text.includes("Memory Limit Exceeded")
+  ) {
+    return "failed";
+  }
+
+  return null;
 }

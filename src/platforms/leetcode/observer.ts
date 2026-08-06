@@ -1,12 +1,6 @@
 import { extractProblemMetadata } from "./extractor";
 import { MESSAGE_TYPES } from "../../shared/messages";
-
-import {
-  attachSubmitListener,
-  extractSubmissionVerdict,
-  isSubmissionPending,
-  clearSubmissionPending,
-} from "./submission";
+import { attachSubmitListener } from "./submission";
 
 let lastProblemSlug: string | null = null;
 
@@ -45,29 +39,11 @@ function detectProblem(): void {
   console.log("Problem detected:", metadata);
 }
 
-function detectSubmission(): void {
-  // Always make sure the submit button has a listener
-  attachSubmitListener();
-
-  // User has not  clicked submit button
-  if (!isSubmissionPending()) {
-    return;
-  }
-
-  const verdict = extractSubmissionVerdict();
-
-  if (!verdict) {
-    return;
-  }
-
-  console.log("Submission verdict:", verdict);
-
-  clearSubmissionPending();
-}
-
 export function startProblemObserver() {
   detectProblem();
-  detectSubmission();
+
+  // Attach submit listener once
+  attachSubmitListener();
 
   let timeoutId: number | undefined;
 
@@ -76,7 +52,9 @@ export function startProblemObserver() {
 
     timeoutId = window.setTimeout(() => {
       detectProblem();
-      detectSubmission();
+
+      // React may replace the submit button
+      attachSubmitListener();
     }, 100);
   });
 
