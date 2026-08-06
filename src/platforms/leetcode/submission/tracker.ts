@@ -14,7 +14,6 @@ export function startSubmissionTracker(): SubmissionTracker {
   let activeSubmissionId: string | null = null;
   let pollingInterval: number | null = null;
   let pollingTimeout: number | null = null;
-  let buttonCheckInterval: number | null = null;
 
   function stopPolling(): void {
     if (pollingInterval !== null) {
@@ -97,22 +96,44 @@ export function startSubmissionTracker(): SubmissionTracker {
     startPolling();
   }
 
-  // Attach submit listener
+  // Attach submit listener initially
   attachSubmitListener(onSubmitClick);
 
-  // Periodically check listener attachment to handle React DOM re-renders
-  buttonCheckInterval = window.setInterval(() => {
+  let retryTimeout: number | null = null;
+
+  // Targeted MutationObserver to re-bind if React replaces the submit button node
+  const buttonObserver = new MutationObserver(() => {
     attachSubmitListener(onSubmitClick);
-  }, 1000);
+  });
+
+  function observeSubmitContainer(): void {
+    attachSubmitListener(onSubmitClick);
+
+    const submitBtn = document.querySelector('[data-e2e-locator="console-submit-button"]');
+    const container = submitBtn?.parentElement ?? document.querySelector("#qd-content");
+
+    if (!container) {
+      retryTimeout = window.setTimeout(observeSubmitContainer, 500);
+      return;
+    }
+
+    buttonObserver.observe(container, {
+      childList: true,
+      subtree: true,
+    });
+  }
+
+  observeSubmitContainer();
 
   function dispose(): void {
+    if (retryTimeout !== null) {
+      window.clearTimeout(retryTimeout);
+      retryTimeout = null;
+    }
+
     stopPolling();
     detachSubmitListener();
-
-    if (buttonCheckInterval !== null) {
-      window.clearInterval(buttonCheckInterval);
-      buttonCheckInterval = null;
-    }
+    buttonObserver.disconnect();
   }
 
   return {

@@ -14,18 +14,18 @@ export function getCurrentProblemMetadata(): ProblemDetectedPayload | null {
   return currentProblemMetadata;
 }
 
-function detectProblem(): void {
+function detectProblem(): boolean {
   if (!location.pathname.startsWith("/problems/")) {
     lastProblemSlug = null;
     currentProblemId = null;
     currentProblemMetadata = null;
-    return;
+    return false;
   }
 
   const metadata = extractProblemMetadata();
 
   if (!metadata) {
-    return;
+    return false;
   }
 
   // Assign problem ID immediately from URL slug (URL is synchronous & reliable)
@@ -37,12 +37,12 @@ function detectProblem(): void {
     metadata.difficulty !== "unknown";
 
   if (!hasCompleteMetadata) {
-    return;
+    return false;
   }
 
   // Same problem, ignore
   if (metadata.slug === lastProblemSlug) {
-    return;
+    return true;
   }
 
   lastProblemSlug = metadata.slug;
@@ -53,25 +53,76 @@ function detectProblem(): void {
   });
 
   console.log("Problem detected:", metadata);
+  return true;
+}
+
+let isHistoryPatched = false;
+
+function patchHistoryMethods(): void {
+  if (isHistoryPatched) {
+    return;
+  }
+
+  isHistoryPatched = true;
+
+  const originalPushState = history.pushState;
+  const originalReplaceState = history.replaceState;
+
+  history.pushState = function (...args) {
+    originalPushState.apply(this, args);
+    window.dispatchEvent(new Event("locationchange"));
+  };
+
+  history.replaceState = function (...args) {
+    originalReplaceState.apply(this, args);
+    window.dispatchEvent(new Event("locationchange"));
+  };
 }
 
 export function startProblemObserver() {
-  detectProblem();
+  patchHistoryMethods();
 
   let timeoutId: number | undefined;
+  let isObserving = false;
 
   const observer = new MutationObserver(() => {
     window.clearTimeout(timeoutId);
 
     timeoutId = window.setTimeout(() => {
-      detectProblem();
+      const isComplete = detectProblem();
+      if (isComplete && isObserving) {
+        observer.disconnect();
+        isObserving = false;
+      }
     }, 100);
   });
 
-  observer.observe(document.body, {
-    childList: true,
-    subtree: true,
-  });
+  function startObserving() {
+    const isComplete = detectProblem();
+    if (!isComplete && !isObserving) {
+      observer.observe(document.body, {
+        childList: true,
+        subtree: true,
+      });
+      isObserving = true;
+    }
+  }
 
-  return () => observer.disconnect();
+  startObserving();
+
+  const onLocationChange = () => {
+    startObserving();
+  };
+
+  window.addEventListener("popstate", onLocationChange);
+  window.addEventListener("locationchange", onLocationChange);
+
+  return () => {
+    window.removeEventListener("popstate", onLocationChange);
+    window.removeEventListener("locationchange", onLocationChange);
+    if (isObserving) {
+      observer.disconnect();
+      isObserving = false;
+    }
+  };
 }
