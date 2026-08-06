@@ -1,5 +1,6 @@
 import { MESSAGE_TYPES } from "../../shared/messages";
 import type { SubmissionVerdict } from "../../shared/types";
+import { getCurrentProblemId } from "./observer";
 
 const SUBMIT_BUTTON_SELECTOR =
   '[data-e2e-locator="console-submit-button"]';
@@ -26,11 +27,20 @@ function startVerdictPolling(): void {
       return;
     }
 
+    const problemId = getCurrentProblemId();
+
+    if (!problemId) {
+      console.warn("No active problem");
+      stopVerdictPolling();
+      return;
+    }
+
     stopVerdictPolling();
 
     chrome.runtime.sendMessage({
       type: MESSAGE_TYPES.ATTEMPT_SUBMITTED,
       payload: {
+        problemId,
         verdict,
       },
     });

@@ -42,6 +42,8 @@ export class ProblemRepository {
    * Creates or updates a problem.
    */
   async save(problem: Problem): Promise<void> {
+    console.log("Saving problem:", problem);
+
     const problems = await this.findAll();
 
     problems[problem.id] = problem;
@@ -93,22 +95,39 @@ export class ProblemRepository {
   }
 
   /**
-   * Records a new submission attempt.
+   * Updates problem attempt statistics and status.
    */
-  async incrementAttempts(
+  async updateAttempt(
     problemId: string,
-    solved: boolean
+    verdict: "accepted" | "failed"
   ): Promise<void> {
     const problem = await this.findById(problemId);
 
-    if (!problem) return;
+    if (!problem) {
+      console.warn("Cannot update attempt: Problem not found", problemId);
+      return;
+    }
+
+    console.log("Before update:", JSON.parse(JSON.stringify(problem)));
+
+    const now = Date.now();
 
     problem.attempts += 1;
-    problem.lastAttemptAt = Date.now();
+    problem.lastAttemptAt = now;
 
-    if (solved) {
+    if (verdict === "accepted") {
       problem.status = "solved";
+
+      if (!problem.solvedAt) {
+        problem.solvedAt = now;
+      }
+    } else if (verdict === "failed") {
+      if (problem.status !== "solved") {
+        problem.status = "attempted";
+      }
     }
+
+    console.log("After update:", problem);
 
     await this.save(problem);
   }

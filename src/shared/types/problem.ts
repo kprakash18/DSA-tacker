@@ -20,6 +20,7 @@ export interface Problem {
   firstSeenAt: number; // first time the extension detects the problem
   lastOpenedAt: number; // last time the problem was opened
   lastAttemptAt: number | null; // last submission timestamp
+  solvedAt?: number | null; // first solved timestamp
 
   notes: string;
 

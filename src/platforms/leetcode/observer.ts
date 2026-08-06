@@ -3,10 +3,16 @@ import { MESSAGE_TYPES } from "../../shared/messages";
 import { attachSubmitListener } from "./submission";
 
 let lastProblemSlug: string | null = null;
+let currentProblemId: string | null = null;
+
+export function getCurrentProblemId(): string | null {
+  return currentProblemId;
+}
 
 function detectProblem(): void {
   if (!location.pathname.startsWith("/problems/")) {
     lastProblemSlug = null;
+    currentProblemId = null;
     return;
   }
 
@@ -15,6 +21,9 @@ function detectProblem(): void {
   if (!metadata) {
     return;
   }
+
+  // Assign problem ID immediately from URL slug (URL is synchronous & reliable)
+  currentProblemId = `${metadata.platform}:${metadata.slug}`;
 
   const hasCompleteMetadata =
     metadata.title.trim() !== "" &&
@@ -31,12 +40,20 @@ function detectProblem(): void {
 
   lastProblemSlug = metadata.slug;
 
-  chrome.runtime.sendMessage({
-    type: MESSAGE_TYPES.PROBLEM_DETECTED,
-    payload: metadata,
-  });
+  console.log("Before PROBLEM_DETECTED");
 
-  console.log("Problem detected:", metadata);
+  chrome.runtime.sendMessage(
+    {
+      type: MESSAGE_TYPES.PROBLEM_DETECTED,
+      payload: metadata,
+    },
+    () => {
+      console.log("PROBLEM_DETECTED callback");
+      console.log("lastError:", chrome.runtime.lastError);
+    }
+  );
+
+  console.log("After PROBLEM_DETECTED");
 }
 
 export function startProblemObserver() {
