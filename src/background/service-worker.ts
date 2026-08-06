@@ -1,11 +1,10 @@
 import { MESSAGE_TYPES } from "../shared/messages";
-
 import type { RuntimeMessage } from "../shared/types";
-
 import { handleProblemDetected } from "./handlers/problemDetected.handler";
 import { handleAttemptSubmitted } from "./handlers/attemptSubmitted.handler";
+import { logger } from "../shared/utils/logger";
 
-console.log("Problem Tracker Background Started");
+logger.info("Problem Tracker Background Started");
 
 chrome.runtime.onMessage.addListener(async (message: RuntimeMessage) => {
   switch (message.type) {
@@ -18,6 +17,6 @@ chrome.runtime.onMessage.addListener(async (message: RuntimeMessage) => {
       break;
 
     default:
-      console.warn("Unknown message:", message.type);
+      logger.warn("Unknown message:", message.type);
   }
 });

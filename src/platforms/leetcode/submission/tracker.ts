@@ -1,4 +1,5 @@
 import { MESSAGE_TYPES } from "../../../shared/messages";
+import { logger } from "../../../shared/utils/logger";
 import { getCurrentProblemId, getCurrentProblemMetadata } from "../observer";
 import { attachSubmitListener, detachSubmitListener } from "./listener";
 import { extractVerdict } from "./verdict";
@@ -53,7 +54,7 @@ export function startSubmissionTracker(): SubmissionTracker {
       const problemId = getCurrentProblemId();
 
       if (!problemId) {
-        console.warn("No active problem detected during submission");
+        logger.warn("No active problem detected during submission");
         stopPolling();
         return;
       }
@@ -75,7 +76,7 @@ export function startSubmissionTracker(): SubmissionTracker {
           },
         });
       } catch (error) {
-        console.error("Failed to dispatch ATTEMPT_SUBMITTED message:", error);
+        logger.error("Failed to dispatch ATTEMPT_SUBMITTED message:", error);
       } finally {
         state = "idle";
       }
@@ -83,7 +84,7 @@ export function startSubmissionTracker(): SubmissionTracker {
 
     // 30-second safety timeout
     pollingTimeout = window.setTimeout(() => {
-      console.warn("Submission polling timed out after 30 seconds");
+      logger.warn("Submission polling timed out after 30 seconds");
       stopPolling();
     }, 30000);
   }

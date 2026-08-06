@@ -6,12 +6,13 @@ import type {
   Problem,
   ProblemDetectedPayload,
 } from "../../shared/types";
+import { logger } from "../../shared/utils/logger";
 
 export async function handleAttemptSubmitted(
   payload: AttemptSubmittedPayload
 ): Promise<void> {
   if (!payload || !payload.problemId || !payload.verdict) {
-    console.warn("Invalid ATTEMPT_SUBMITTED payload received:", payload);
+    logger.warn("Invalid ATTEMPT_SUBMITTED payload received:", payload);
     return;
   }
 
@@ -52,11 +53,11 @@ export async function handleAttemptSubmitted(
     }
 
     await problemRepository.updateAttempt(payload.problemId, payload.verdict);
-    console.log("Submission recorded:", {
+    logger.info("Submission recorded:", {
       problemId: payload.problemId,
       verdict: payload.verdict,
     });
   } catch (error) {
-    console.error("Failed to process submission attempt:", error);
+    logger.error("Failed to process submission attempt:", error);
   }
 }

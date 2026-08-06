@@ -1,6 +1,7 @@
 import { extractProblemMetadata } from "./extractor";
 import { MESSAGE_TYPES } from "../../shared/messages";
 import type { ProblemDetectedPayload } from "../../shared/types";
+import { logger } from "../../shared/utils/logger";
 
 let lastProblemSlug: string | null = null;
 let currentProblemId: string | null = null;
@@ -52,7 +53,7 @@ function detectProblem(): boolean {
     payload: metadata,
   });
 
-  console.log("Problem detected:", metadata);
+  logger.info("Problem detected:", metadata);
   return true;
 }
 
