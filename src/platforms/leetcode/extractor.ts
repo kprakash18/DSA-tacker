@@ -33,7 +33,7 @@ function extractTitle(slug: string): string {
 function extractDifficulty(): Difficulty {
   const elements = document.querySelectorAll<HTMLElement>("div");
 
-  for (const element of elements) {
+  for (const element of Array.from(elements)) {
     const text = element.textContent?.trim();
 
     switch (text) {

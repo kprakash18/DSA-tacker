@@ -1,6 +1,13 @@
 import { extractProblemMetadata } from "./extractor";
 import { MESSAGE_TYPES } from "../../shared/messages";
 
+import {
+  attachSubmitListener,
+  extractSubmissionVerdict,
+  isSubmissionPending,
+  clearSubmissionPending,
+} from "./submission";
+
 let lastProblemSlug: string | null = null;
 
 function detectProblem(): void {
@@ -15,16 +22,16 @@ function detectProblem(): void {
     return;
   }
 
-  // Ignore duplicate detections for already completely processed problem
-  if (metadata.slug === lastProblemSlug) {
+  const hasCompleteMetadata =
+    metadata.title.trim() !== "" &&
+    metadata.difficulty !== "unknown";
+
+  if (!hasCompleteMetadata) {
     return;
   }
 
-  // Check if metadata is complete
-  const hasCompleteMetadata =
-    metadata.title.trim() !== "" && metadata.difficulty !== "unknown";
-
-  if (!hasCompleteMetadata) {
+  // Same problem, ignore
+  if (metadata.slug === lastProblemSlug) {
     return;
   }
 
@@ -38,24 +45,38 @@ function detectProblem(): void {
   console.log("Problem detected:", metadata);
 }
 
+function detectSubmission(): void {
+  // Always make sure the submit button has a listener
+  attachSubmitListener();
+
+  // User has not  clicked submit button
+  if (!isSubmissionPending()) {
+    return;
+  }
+
+  const verdict = extractSubmissionVerdict();
+
+  if (!verdict) {
+    return;
+  }
+
+  console.log("Submission verdict:", verdict);
+
+  clearSubmissionPending();
+}
+
 export function startProblemObserver() {
   detectProblem();
+  detectSubmission();
 
-  let lastUrl = location.href;
   let timeoutId: number | undefined;
 
   const observer = new MutationObserver(() => {
     window.clearTimeout(timeoutId);
 
     timeoutId = window.setTimeout(() => {
-      const currentUrl = location.href;
-
-      if (currentUrl !== lastUrl) {
-        lastUrl = currentUrl;
-        lastProblemSlug = null;
-      }
-
       detectProblem();
+      detectSubmission();
     }, 100);
   });
 
