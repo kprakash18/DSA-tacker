@@ -2,7 +2,6 @@ export type Platform = "leetcode" | "gfg";
 
 export type Difficulty = "easy" | "medium" | "hard" | "unknown";
 export type ProblemStatus = "attempted" | "solved" | "revisit";
-export type SubmissionVerdict = "accepted" | "failed";
 
 export interface Problem {
   
@@ -14,7 +13,7 @@ export interface Problem {
   title: string;
   url: string;
   difficulty: Difficulty;
-  tags?: string[];
+  tags: string[];
 
   status: ProblemStatus ;
   attempts: number;
@@ -25,3 +24,5 @@ export interface Problem {
   notes: string;
 
 }
+
+export type ProblemStore = Record<string, Problem>;
