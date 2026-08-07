@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { getToSolve, addToSolve, removeFromToSolve } from "../services/sidebarApi";
 import type { AddToSolvePayload, ToSolveProblem } from "../../shared/types";
+import { STORAGE_KEYS } from "../../shared/constants/storageKeys";
 
 export function useToSolve() {
   const [toSolveList, setToSolveList] = useState<ToSolveProblem[]>([]);
@@ -25,8 +26,11 @@ export function useToSolve() {
 
     fetchToSolve();
 
-    const handleStorageChange = (changes: { [key: string]: chrome.storage.StorageChange }) => {
-      if (changes.to_solve) {
+    const handleStorageChange = (
+      changes: { [key: string]: chrome.storage.StorageChange },
+      areaName: string
+    ) => {
+      if ((areaName === "local" || !areaName) && changes[STORAGE_KEYS.TO_SOLVE]) {
         fetchToSolve();
       }
     };

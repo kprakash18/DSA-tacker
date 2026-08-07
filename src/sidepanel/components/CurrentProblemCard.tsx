@@ -1,7 +1,8 @@
-import type { ProblemDetectedPayload } from "../../shared/types";
+import type { Problem, ProblemDetectedPayload } from "../../shared/types";
 
 interface CurrentProblemCardProps {
   currentProblem: ProblemDetectedPayload;
+  historyProblem?: Problem | null;
   isBookmarked: boolean;
   onAdd: () => void;
   onRemove: () => void;
@@ -9,12 +10,15 @@ interface CurrentProblemCardProps {
 
 export default function CurrentProblemCard({
   currentProblem,
+  historyProblem,
   isBookmarked,
   onAdd,
   onRemove,
 }: CurrentProblemCardProps) {
+  const isAttempted = historyProblem?.status === "attempted";
+
   return (
-    <div className="rounded-lg border border-blue-200 bg-blue-50/50 p-4 shadow-sm">
+    <div className="rounded-lg border border-blue-200 bg-blue-50/50 p-4 shadow-xs">
       <div className="text-xs font-semibold uppercase tracking-wider text-blue-600 mb-1">
         Currently Viewing
       </div>
@@ -50,6 +54,16 @@ export default function CurrentProblemCard({
         </span>
       </div>
 
+      {isAttempted && historyProblem && (
+        <div className="mt-2 text-xs font-medium text-amber-800 bg-amber-50 border border-amber-200 rounded-md p-2 flex items-center gap-1.5">
+          <span>⚠️</span>
+          <span>
+            You've attempted this problem ({historyProblem.attempts}{" "}
+            {historyProblem.attempts === 1 ? "attempt" : "attempts"}).
+          </span>
+        </div>
+      )}
+
       <div className="mt-3 flex items-center justify-between">
         {isBookmarked ? (
           <>
@@ -68,7 +82,7 @@ export default function CurrentProblemCard({
             onClick={onAdd}
             className="w-full rounded-md bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700 transition-colors"
           >
-            [ Solve Later ]
+            {isAttempted ? "[ Save to Solve Later ]" : "[ Solve Later ]"}
           </button>
         )}
       </div>

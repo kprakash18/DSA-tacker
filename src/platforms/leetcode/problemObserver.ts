@@ -115,12 +115,29 @@ export function startProblemObserver() {
     startObserving();
   };
 
+  const onFocus = () => {
+    if (location.pathname.startsWith("/problems/")) {
+      const metadata = extractProblemMetadata();
+      if (metadata && metadata.title.trim() !== "" && metadata.difficulty !== "unknown") {
+        currentProblemId = `${metadata.platform}:${metadata.slug}`;
+        currentProblemMetadata = metadata;
+        lastProblemSlug = metadata.slug;
+        chrome.runtime.sendMessage({
+          type: MESSAGE_TYPES.PROBLEM_DETECTED,
+          payload: metadata,
+        });
+      }
+    }
+  };
+
   window.addEventListener("popstate", onLocationChange);
   window.addEventListener("locationchange", onLocationChange);
+  window.addEventListener("focus", onFocus);
 
   return () => {
     window.removeEventListener("popstate", onLocationChange);
     window.removeEventListener("locationchange", onLocationChange);
+    window.removeEventListener("focus", onFocus);
     if (isObserving) {
       observer.disconnect();
       isObserving = false;

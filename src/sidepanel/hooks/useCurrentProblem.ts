@@ -8,15 +8,38 @@ export function useCurrentProblem() {
 
   useEffect(() => {
     let isMounted = true;
-    getCurrentProblem().then((data) => {
-      if (isMounted) {
-        setCurrentProblem(data);
-        setLoading(false);
+
+    const fetchCurrent = () => {
+      getCurrentProblem().then((data) => {
+        if (isMounted) {
+          setCurrentProblem(data);
+          setLoading(false);
+        }
+      });
+    };
+
+    fetchCurrent();
+
+    const handleStorageChange = (
+      changes: { [key: string]: chrome.storage.StorageChange },
+      areaName: string
+    ) => {
+      if ((areaName === "session" || areaName === "local") && changes.activeProblem) {
+        if (changes.activeProblem.newValue) {
+          if (isMounted) {
+            setCurrentProblem(changes.activeProblem.newValue as ProblemDetectedPayload);
+          }
+        } else {
+          fetchCurrent();
+        }
       }
-    });
+    };
+
+    chrome.storage.onChanged.addListener(handleStorageChange);
 
     return () => {
       isMounted = false;
+      chrome.storage.onChanged.removeListener(handleStorageChange);
     };
   }, []);
 

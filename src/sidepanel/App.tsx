@@ -6,27 +6,40 @@ import ProblemList from "./components/ProblemList";
 import ToSolveList from "./components/ToSolveList";
 import CurrentProblemCard from "./components/CurrentProblemCard";
 import { useCurrentProblem } from "./hooks/useCurrentProblem";
+import { useProblems } from "./hooks/useProblems";
 import { useToSolve } from "./hooks/useToSolve";
 
 function App() {
   const [activeTab, setActiveTab] = useState<"history" | "toSolve">("history");
   const [searchQuery, setSearchQuery] = useState("");
+
+  const { problems } = useProblems();
   const { currentProblem } = useCurrentProblem();
   const { toSolveList, add, remove } = useToSolve();
 
   const currentProblemId = currentProblem ? `${currentProblem.platform}:${currentProblem.slug}` : null;
+
+  const historyProblem = currentProblemId
+    ? problems.find((p) => p.id === currentProblemId)
+    : null;
+
   const isBookmarked = currentProblemId
     ? toSolveList.some((item) => item.id === currentProblemId)
     : false;
+
+  const showCurrentViewing =
+    Boolean(currentProblem) &&
+    (!historyProblem || historyProblem.status === "attempted");
 
   return (
     <main className="flex h-screen flex-col bg-gray-50">
       <Header />
 
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {currentProblem && (
+        {showCurrentViewing && currentProblem && (
           <CurrentProblemCard
             currentProblem={currentProblem}
+            historyProblem={historyProblem}
             isBookmarked={isBookmarked}
             onAdd={() =>
               add({
@@ -77,7 +90,7 @@ function App() {
         {activeTab === "history" ? (
           <div className="space-y-4">
             <SearchBar value={searchQuery} onChange={setSearchQuery} />
-            <StatsBar />
+            <StatsBar problems={problems} />
             <ProblemList searchQuery={searchQuery} />
           </div>
         ) : (

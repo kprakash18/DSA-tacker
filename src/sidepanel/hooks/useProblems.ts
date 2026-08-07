@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { getProblems } from "../services/sidebarApi";
 import type { Problem } from "../../shared/types";
+import { STORAGE_KEYS } from "../../shared/constants/storageKeys";
 
 export function useProblems() {
   const [problems, setProblems] = useState<Problem[]>([]);
@@ -20,8 +21,11 @@ export function useProblems() {
 
     fetchProblems();
 
-    const handleStorageChange = (changes: { [key: string]: chrome.storage.StorageChange }) => {
-      if (changes.problems) {
+    const handleStorageChange = (
+      changes: { [key: string]: chrome.storage.StorageChange },
+      areaName: string
+    ) => {
+      if ((areaName === "local" || !areaName) && changes[STORAGE_KEYS.PROBLEMS]) {
         fetchProblems();
       }
     };

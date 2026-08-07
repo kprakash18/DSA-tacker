@@ -15,8 +15,10 @@ export default function ProblemList({ searchQuery = "" }: ProblemListProps) {
   }
 
   const query = searchQuery.trim().toLowerCase();
-  const filteredProblems = problems.filter((problem) =>
-    problem.title.toLowerCase().includes(query)
+  const filteredProblems = problems.filter(
+    (problem) =>
+      problem.title.toLowerCase().includes(query) ||
+      problem.slug.toLowerCase().includes(query)
   );
 
   if (problems.length === 0) {
@@ -34,10 +36,7 @@ export default function ProblemList({ searchQuery = "" }: ProblemListProps) {
   return (
     <div className="space-y-3">
       {filteredProblems.map((problem) => (
-        <ProblemCard
-          key={problem.id}
-          problem={problem}
-        />
+        <ProblemCard key={problem.id} problem={problem} />
       ))}
     </div>
   );

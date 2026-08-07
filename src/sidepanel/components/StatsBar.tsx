@@ -1,13 +1,19 @@
-import { useStatistics } from "../hooks/useStatistics";
+import type { Problem } from "../../shared/types";
 
-export default function StatsBar() {
-  const { stats } = useStatistics();
+interface StatsBarProps {
+  problems: Problem[];
+}
+
+export default function StatsBar({ problems }: StatsBarProps) {
+  const total = problems.length;
+  const solved = problems.filter((p) => p.status === "solved").length;
+  const attempted = problems.filter((p) => p.status === "attempted").length;
 
   return (
     <div className="grid grid-cols-3 gap-3">
-      <Stat title="Total" value={stats.total.toString()} color="text-gray-900" />
-      <Stat title="Solved" value={stats.solved.toString()} color="text-green-600" />
-      <Stat title="Attempted" value={stats.attempted.toString()} color="text-orange-500" />
+      <Stat title="Total" value={total.toString()} color="text-gray-900" />
+      <Stat title="Solved" value={solved.toString()} color="text-green-600" />
+      <Stat title="Attempted" value={attempted.toString()} color="text-orange-500" />
     </div>
   );
 }
