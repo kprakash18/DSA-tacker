@@ -7,6 +7,7 @@ import type {
   ProblemStatus,
   ProblemStore,
 } from "../shared/types";
+import { logger } from "../shared/utils/logger";
 
 export class ProblemRepository {
   /**
@@ -102,7 +103,7 @@ export class ProblemRepository {
     const problem = await this.findById(problemId);
 
     if (!problem) {
-      console.warn("Cannot update attempt: Problem not found", problemId);
+      logger.warn("Cannot update attempt: Problem not found", problemId);
       return;
     }
 

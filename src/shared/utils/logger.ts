@@ -1,17 +1,13 @@
 export const logger = {
-  info(...args: unknown[]): void {
-    if (import.meta.env.DEV) {
-      console.log(...args);
-    }
+  info(...args: unknown[]) {
+    console.log("[INFO]", ...args);
   },
 
-  warn(...args: unknown[]): void {
-    if (import.meta.env.DEV) {
-      console.warn(...args);
-    }
+  warn(...args: unknown[]) {
+    console.warn("[WARN]", ...args);
   },
 
-  error(...args: unknown[]): void {
-    console.error(...args);
+  error(...args: unknown[]) {
+    console.error("[ERROR]", ...args);
   },
 };
