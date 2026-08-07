@@ -31,7 +31,7 @@ export default function ToSolveCard({ problem, onRemove }: ToSolveCardProps) {
         <span
           className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${
             problem.difficulty === "easy"
-              ? "bg-green-100 text-green-700"
+              ? "bg-[#2db55d]/10 text-[#2db55d]"
               : problem.difficulty === "medium"
               ? "bg-yellow-100 text-yellow-700"
               : problem.difficulty === "hard"

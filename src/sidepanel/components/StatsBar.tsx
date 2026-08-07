@@ -12,7 +12,7 @@ export default function StatsBar({ problems }: StatsBarProps) {
   return (
     <div className="grid grid-cols-3 gap-3">
       <Stat title="Total" value={total.toString()} color="text-gray-900" />
-      <Stat title="Solved" value={solved.toString()} color="text-green-600" />
+      <Stat title="Solved" value={solved.toString()} color="text-[#2db55d]" />
       <Stat title="Attempted" value={attempted.toString()} color="text-orange-500" />
     </div>
   );

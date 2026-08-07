@@ -2,21 +2,21 @@ import { MESSAGE_TYPES } from "../../../shared/messages";
 import { logger } from "../../../shared/utils/logger";
 import { getCurrentProblemId, getCurrentProblemMetadata } from "../problemObserver";
 import { attachSubmitListener, detachSubmitListener } from "./submitButtonListener";
-import { extractVerdict } from "./verdictExtractor";
-
-type SubmissionState = "idle" | "waiting" | "completed";
+import { extractVerdict, getResultText } from "./verdictExtractor";
 
 export interface SubmissionTracker {
   dispose(): void;
 }
 
 export function startSubmissionTracker(): SubmissionTracker {
-  let state: SubmissionState = "idle";
+  let waitingForVerdict = false;
+  let initialResultText = "";
+  let isJudgingStarted = false;
   let activeSubmissionId: string | null = null;
   let pollingInterval: number | null = null;
   let pollingTimeout: number | null = null;
 
-  function stopPolling(): void {
+  function stopWaiting(): void {
     if (pollingInterval !== null) {
       window.clearInterval(pollingInterval);
       pollingInterval = null;
@@ -27,74 +27,87 @@ export function startSubmissionTracker(): SubmissionTracker {
       pollingTimeout = null;
     }
 
-    state = "idle";
+    waitingForVerdict = false;
+    isJudgingStarted = false;
     activeSubmissionId = null;
   }
 
-  function startPolling(): void {
-    if (state === "waiting") {
+  function checkVerdict(): void {
+    if (!waitingForVerdict) {
       return;
     }
 
-    state = "waiting";
-    activeSubmissionId = crypto.randomUUID();
+    const currentText = getResultText();
 
-    pollingInterval = window.setInterval(() => {
-      if (state !== "waiting") {
-        stopPolling();
-        return;
-      }
+    // Mark judging as started if text clears, changes, or displays pending state
+    if (
+      !isJudgingStarted &&
+      (currentText !== initialResultText ||
+        currentText.includes("Pending") ||
+        currentText.includes("Judging") ||
+        currentText === "")
+    ) {
+      isJudgingStarted = true;
+    }
 
-      const verdict = extractVerdict();
+    // Do not attempt extraction until judging has actually started to avoid stale old verdicts
+    if (!isJudgingStarted) {
+      return;
+    }
 
-      if (!verdict) {
-        return;
-      }
+    const verdict = extractVerdict();
 
-      const problemId = getCurrentProblemId();
+    if (!verdict) {
+      return;
+    }
 
-      if (!problemId) {
-        logger.warn("No active problem detected during submission");
-        stopPolling();
-        return;
-      }
+    const problemId = getCurrentProblemId();
 
-      const metadata = getCurrentProblemMetadata();
-      const submissionId = activeSubmissionId ?? crypto.randomUUID();
+    if (!problemId) {
+      logger.warn("No active problem detected when verdict arrived");
+      stopWaiting();
+      return;
+    }
 
-      stopPolling();
-      state = "completed";
+    const metadata = getCurrentProblemMetadata();
+    const submissionId = activeSubmissionId ?? crypto.randomUUID();
 
-      try {
-        chrome.runtime.sendMessage({
-          type: MESSAGE_TYPES.ATTEMPT_SUBMITTED,
-          payload: {
-            submissionId,
-            problemId,
-            verdict,
-            metadata: metadata ?? undefined,
-          },
-        });
-      } catch (error) {
-        logger.error("Failed to dispatch ATTEMPT_SUBMITTED message:", error);
-      } finally {
-        state = "idle";
-      }
-    }, 200);
+    stopWaiting();
 
-    // 30-second safety timeout
-    pollingTimeout = window.setTimeout(() => {
-      logger.warn("Submission polling timed out after 30 seconds");
-      stopPolling();
-    }, 30000);
+    try {
+      chrome.runtime.sendMessage({
+        type: MESSAGE_TYPES.ATTEMPT_SUBMITTED,
+        payload: {
+          submissionId,
+          problemId,
+          verdict,
+          metadata: metadata ?? undefined,
+        },
+      });
+      logger.info(`Attempt submitted successfully with verdict: ${verdict} for problem: ${problemId}`);
+    } catch (error) {
+      logger.error("Failed to dispatch ATTEMPT_SUBMITTED message:", error);
+    }
   }
 
   function onSubmitClick(): void {
-    if (state === "waiting") {
+    if (waitingForVerdict) {
       return;
     }
 
-    startPolling();
+    waitingForVerdict = true;
+    isJudgingStarted = false;
+    initialResultText = getResultText();
+    activeSubmissionId = crypto.randomUUID();
+
+    // Poll every 200ms to detect judge completion
+    pollingInterval = window.setInterval(checkVerdict, 200);
+
+    // 30-second safety timeout
+    pollingTimeout = window.setTimeout(() => {
+      logger.warn("Submission verdict polling timed out after 30 seconds");
+      stopWaiting();
+    }, 30000);
   }
 
   // Attach submit listener initially
@@ -132,7 +145,7 @@ export function startSubmissionTracker(): SubmissionTracker {
       retryTimeout = null;
     }
 
-    stopPolling();
+    stopWaiting();
     detachSubmitListener();
     buttonObserver.disconnect();
   }

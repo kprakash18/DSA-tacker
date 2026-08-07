@@ -42,7 +42,7 @@ export default function CurrentProblemCard({
         <span
           className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${
             currentProblem.difficulty === "easy"
-              ? "bg-green-100 text-green-700"
+              ? "bg-[#2db55d]/10 text-[#2db55d]"
               : currentProblem.difficulty === "medium"
               ? "bg-yellow-100 text-yellow-700"
               : currentProblem.difficulty === "hard"
@@ -67,7 +67,7 @@ export default function CurrentProblemCard({
       <div className="mt-3 flex items-center justify-between">
         {isBookmarked ? (
           <>
-            <span className="text-xs font-medium text-green-700 flex items-center gap-1">
+            <span className="text-xs font-medium text-[#2db55d] flex items-center gap-1">
               ✓ Saved to To Solve
             </span>
             <button

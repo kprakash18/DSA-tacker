@@ -24,13 +24,10 @@ export function useCurrentProblem() {
       changes: { [key: string]: chrome.storage.StorageChange },
       areaName: string
     ) => {
-      if ((areaName === "session" || areaName === "local") && changes.activeProblem) {
-        if (changes.activeProblem.newValue) {
-          if (isMounted) {
-            setCurrentProblem(changes.activeProblem.newValue as ProblemDetectedPayload);
-          }
-        } else {
-          fetchCurrent();
+      if ((areaName === "session" || areaName === "local" || !areaName) && changes.activeProblem) {
+        if (isMounted) {
+          setCurrentProblem((changes.activeProblem.newValue as ProblemDetectedPayload) ?? null);
+          setLoading(false);
         }
       }
     };

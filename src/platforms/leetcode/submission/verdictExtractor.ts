@@ -3,18 +3,27 @@ import type { SubmissionVerdict } from "../../../shared/types";
 const CONSOLE_RESULT_SELECTOR = '[data-e2e-locator="console-result"]';
 const SUBMISSION_TAB_SELECTOR = "#submission-detail_tab";
 
-export function extractVerdict(): SubmissionVerdict | null {
+export function getResultText(): string {
   const resultContainer =
     document.querySelector<HTMLElement>(SUBMISSION_TAB_SELECTOR) ??
     document.querySelector<HTMLElement>(CONSOLE_RESULT_SELECTOR);
 
-  if (!resultContainer) {
+  return resultContainer?.textContent?.trim() ?? "";
+}
+
+export function extractVerdict(): SubmissionVerdict | null {
+  const text = getResultText();
+
+  if (!text) {
     return null;
   }
 
-  const text = resultContainer.textContent?.trim() ?? "";
-
-  if (!text) {
+  // If LeetCode is still judging, returning null avoids premature detection
+  if (
+    text.includes("Pending") ||
+    text.includes("Judging") ||
+    text.includes("Running")
+  ) {
     return null;
   }
 
