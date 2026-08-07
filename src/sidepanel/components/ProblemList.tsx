@@ -22,14 +22,21 @@ export default function ProblemList({ searchQuery = "" }: ProblemListProps) {
   );
 
   if (problems.length === 0) {
-    return <EmptyState />;
+    return (
+      <EmptyState
+        title="No history recorded"
+        message="Solve or attempt problems on LeetCode / GFG to track your progress here."
+      />
+    );
   }
 
   if (filteredProblems.length === 0) {
     return (
-      <div className="py-8 text-center text-sm text-gray-500">
-        No problems found matching "{searchQuery}"
-      </div>
+      <EmptyState
+        icon="search_off"
+        title="No matches found"
+        message={`No problems match "${searchQuery}". Try a different search term.`}
+      />
     );
   }
 

@@ -47,6 +47,7 @@ export interface AddToSolvePayload {
   title: string;
   difficulty: Difficulty;
   url: string;
+  tags?: string[];
 }
 
 export interface RemoveFromToSolvePayload {

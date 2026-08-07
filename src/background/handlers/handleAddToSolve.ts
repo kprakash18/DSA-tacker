@@ -10,6 +10,7 @@ export async function handleAddToSolve(payload: AddToSolvePayload): Promise<void
     title: payload.title,
     difficulty: payload.difficulty,
     url: payload.url,
+    tags: payload.tags,
     createdAt: Date.now(),
   };
   await toSolveRepository.add(problem);

@@ -35,6 +35,7 @@ export interface ToSolveProblem {
   title: string;
   difficulty: Difficulty;
   url: string;
+  tags?: string[];
   createdAt: number;
 }
 
