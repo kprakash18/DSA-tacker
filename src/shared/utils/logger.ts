@@ -1,14 +1,16 @@
+const IS_DEV = Boolean(import.meta.env.DEV);
+
 export const logger = {
   debug(...args: unknown[]) {
-    console.debug("[DEBUG]", ...args);
+    if (IS_DEV) console.debug("[DEBUG]", ...args);
   },
 
   info(...args: unknown[]) {
-    console.log("[INFO]", ...args);
+    if (IS_DEV) console.log("[INFO]", ...args);
   },
 
   warn(...args: unknown[]) {
-    console.warn("[WARN]", ...args);
+    if (IS_DEV) console.warn("[WARN]", ...args);
   },
 
   error(...args: unknown[]) {
