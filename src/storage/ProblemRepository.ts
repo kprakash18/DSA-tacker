@@ -22,6 +22,14 @@ export class ProblemRepository {
   }
 
   /**
+   * Returns all tracked problems as an array.
+   */
+  async getAll(): Promise<Problem[]> {
+    const problems = await this.findAll();
+    return Object.values(problems);
+  }
+
+  /**
    * Finds a problem by its unique id.
    */
   async findById(problemId: string): Promise<Problem | null> {

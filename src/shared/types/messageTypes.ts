@@ -44,6 +44,9 @@ export interface ProblemDeletedPayload {
 
 export type RuntimeMessage =
   | {
+      type: typeof MESSAGE_TYPES.GET_PROBLEMS;
+    }
+  | {
       type: typeof MESSAGE_TYPES.PROBLEM_DETECTED;
       payload: ProblemDetectedPayload;
     }
