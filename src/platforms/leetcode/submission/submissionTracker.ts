@@ -1,5 +1,6 @@
 import { MESSAGE_TYPES } from "../../../shared/messages";
 import { logger } from "../../../shared/utils/logger";
+import { safeSendMessage } from "../../../shared/utils/safeSendMessage";
 import { getCurrentProblemId, getCurrentProblemMetadata } from "../problemObserver";
 import { attachSubmitListener, detachSubmitListener } from "./submitButtonListener";
 import { extractVerdict, getResultText } from "./verdictExtractor";
@@ -74,20 +75,16 @@ export function startSubmissionTracker(): SubmissionTracker {
 
     stopWaiting();
 
-    try {
-      chrome.runtime.sendMessage({
-        type: MESSAGE_TYPES.ATTEMPT_SUBMITTED,
-        payload: {
-          submissionId,
-          problemId,
-          verdict,
-          metadata: metadata ?? undefined,
-        },
-      });
-      logger.info(`Attempt submitted successfully with verdict: ${verdict} for problem: ${problemId}`);
-    } catch (error) {
-      logger.error("Failed to dispatch ATTEMPT_SUBMITTED message:", error);
-    }
+    safeSendMessage({
+      type: MESSAGE_TYPES.ATTEMPT_SUBMITTED,
+      payload: {
+        submissionId,
+        problemId,
+        verdict,
+        metadata: metadata ?? undefined,
+      },
+    });
+    logger.info(`Attempt submitted successfully with verdict: ${verdict} for problem: ${problemId}`);
   }
 
   function onSubmitClick(): void {

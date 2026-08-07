@@ -2,6 +2,7 @@ import { extractProblemMetadata } from "./problemExtractor";
 import { MESSAGE_TYPES } from "../../shared/messages";
 import type { ProblemDetectedPayload } from "../../shared/types";
 import { logger } from "../../shared/utils/logger";
+import { safeSendMessage } from "../../shared/utils/safeSendMessage";
 
 let lastProblemSlug: string | null = null;
 let currentProblemId: string | null = null;
@@ -48,7 +49,7 @@ function detectProblem(): boolean {
 
   lastProblemSlug = metadata.slug;
 
-  chrome.runtime.sendMessage({
+  safeSendMessage({
     type: MESSAGE_TYPES.PROBLEM_DETECTED,
     payload: metadata,
   });
@@ -122,7 +123,7 @@ export function startProblemObserver() {
         currentProblemId = `${metadata.platform}:${metadata.slug}`;
         currentProblemMetadata = metadata;
         lastProblemSlug = metadata.slug;
-        chrome.runtime.sendMessage({
+        safeSendMessage({
           type: MESSAGE_TYPES.PROBLEM_DETECTED,
           payload: metadata,
         });

@@ -5,7 +5,7 @@ export default defineManifest({
 
   name: "Problem Tracker",
 
-  description: "Automatically track LeetCode and GeeksforGeeks problems.",
+  description: "Track your LeetCode and GeeksforGeeks problem-solving journey automatically. Bookmark challenges, monitor submission verdicts, and analyze your DSA statistics in a sleek side panel.",
 
   version: "1.0.0",
 

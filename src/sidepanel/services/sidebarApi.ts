@@ -1,5 +1,6 @@
 import { MESSAGE_TYPES } from "../../shared/messages";
 import type { AddToSolvePayload, Problem, ProblemDetectedPayload, ToSolveProblem } from "../../shared/types";
+import { safeSendMessage } from "../../shared/utils/safeSendMessage";
 
 export interface ProblemStatistics {
   total: number;
@@ -8,42 +9,42 @@ export interface ProblemStatistics {
 }
 
 export async function getProblems(): Promise<Problem[]> {
-  const problems = await chrome.runtime.sendMessage({
+  const problems = await safeSendMessage<Problem[]>({
     type: MESSAGE_TYPES.GET_PROBLEMS,
   });
   return problems ?? [];
 }
 
 export async function getStatistics(): Promise<ProblemStatistics> {
-  const stats = await chrome.runtime.sendMessage({
+  const stats = await safeSendMessage<ProblemStatistics>({
     type: MESSAGE_TYPES.GET_STATISTICS,
   });
   return stats ?? { total: 0, solved: 0, attempted: 0 };
 }
 
 export async function getToSolve(): Promise<ToSolveProblem[]> {
-  const list = await chrome.runtime.sendMessage({
+  const list = await safeSendMessage<ToSolveProblem[]>({
     type: MESSAGE_TYPES.GET_TO_SOLVE,
   });
   return list ?? [];
 }
 
 export async function addToSolve(payload: AddToSolvePayload): Promise<void> {
-  await chrome.runtime.sendMessage({
+  await safeSendMessage({
     type: MESSAGE_TYPES.ADD_TO_SOLVE,
     payload,
   });
 }
 
 export async function removeFromToSolve(problemId: string): Promise<void> {
-  await chrome.runtime.sendMessage({
+  await safeSendMessage({
     type: MESSAGE_TYPES.REMOVE_FROM_TO_SOLVE,
     payload: { problemId },
   });
 }
 
 export async function getCurrentProblem(): Promise<ProblemDetectedPayload | null> {
-  const current = await chrome.runtime.sendMessage({
+  const current = await safeSendMessage<ProblemDetectedPayload>({
     type: MESSAGE_TYPES.GET_CURRENT_PROBLEM,
   });
   return current ?? null;
