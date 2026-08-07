@@ -80,7 +80,6 @@ function App() {
             problems={problems}
             toSolveList={toSolveList}
             onNavigateTab={setActiveTab}
-            onRemoveToSolve={remove}
           />
         )}
 

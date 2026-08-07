@@ -45,12 +45,10 @@ export function useToSolve() {
 
   const add = async (payload: AddToSolvePayload) => {
     await addToSolve(payload);
-    await fetchList();
   };
 
   const remove = async (problemId: string) => {
     await removeFromToSolve(problemId);
-    await fetchList();
   };
 
   return {

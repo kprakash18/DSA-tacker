@@ -13,15 +13,10 @@ export default function Header() {
       </div>
 
       <div className="flex items-center gap-1.5">
-        <button
-          aria-label="Settings"
-          className="w-7 h-7 flex items-center justify-center rounded-full text-gray-500 hover:bg-gray-100 transition-colors"
-        >
-          <span className="material-symbols-outlined text-[18px]">settings</span>
-        </button>
-        <div className="w-7 h-7 rounded-full bg-blue-600 flex items-center justify-center text-white text-xs font-semibold">
-          <span className="material-symbols-outlined text-[16px]">person</span>
-        </div>
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-emerald-50 text-[#2db55d] border border-emerald-200/60">
+          <span className="w-1.5 h-1.5 rounded-full bg-[#2db55d] animate-pulse"></span>
+          <span>LeetCode Active</span>
+        </span>
       </div>
     </header>
   );

@@ -27,7 +27,7 @@ export class ProblemRepository {
   async getAll(): Promise<Problem[]> {
     const problems = await this.findAll();
     return Object.values(problems).filter(
-      (p) => p.attempts > 0 && p.status !== ("open" as unknown as ProblemStatus)
+      (p) => p.attempts > 0 && Boolean(p.status)
     );
   }
   /**

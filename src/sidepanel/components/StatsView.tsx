@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import type { Problem } from "../../shared/types";
 import DifficultyBadge from "./DifficultyBadge";
 import StatusIndicator from "./StatusIndicator";
@@ -9,25 +10,52 @@ interface StatsViewProps {
 
 export default function StatsView({ problems }: StatsViewProps) {
   const totalCount = problems.length;
-  const solvedList = problems.filter((p) => p.status === "solved");
-  const solvedCount = solvedList.length;
-  const attemptedCount = problems.filter((p) => p.status === "attempted").length;
 
-  const easySolved = solvedList.filter((p) => (p.difficulty || "").toLowerCase() === "easy").length;
-  const medSolved = solvedList.filter((p) => {
-    const d = (p.difficulty || "").toLowerCase();
-    return d === "medium" || d === "med";
-  }).length;
-  const hardSolved = solvedList.filter((p) => (p.difficulty || "").toLowerCase() === "hard").length;
+  const {
+    solvedCount,
+    attemptedCount,
+    easySolved,
+    medSolved,
+    hardSolved,
+    easyPct,
+    medPct,
+    hardPct,
+  } = useMemo(() => {
+    const solvedList = problems.filter((p) => p.status === "solved");
+    const solvedCount = solvedList.length;
+    const attemptedCount = problems.filter((p) => p.status === "attempted").length;
 
-  const easyPct = solvedCount > 0 ? Math.round((easySolved / solvedCount) * 100) : 0;
-  const medPct = solvedCount > 0 ? Math.round((medSolved / solvedCount) * 100) : 0;
-  const hardPct = solvedCount > 0 ? Math.round((hardSolved / solvedCount) * 100) : 0;
+    const easySolved = solvedList.filter((p) => (p.difficulty || "").toLowerCase() === "easy").length;
+    const medSolved = solvedList.filter((p) => {
+      const d = (p.difficulty || "").toLowerCase();
+      return d === "medium" || d === "med";
+    }).length;
+    const hardSolved = solvedList.filter((p) => (p.difficulty || "").toLowerCase() === "hard").length;
+
+    const easyPct = solvedCount > 0 ? Math.round((easySolved / solvedCount) * 100) : 0;
+    const medPct = solvedCount > 0 ? Math.round((medSolved / solvedCount) * 100) : 0;
+    const hardPct = solvedCount > 0 ? Math.round((hardSolved / solvedCount) * 100) : 0;
+
+    return {
+      solvedCount,
+      attemptedCount,
+      easySolved,
+      medSolved,
+      hardSolved,
+      easyPct,
+      medPct,
+      hardPct,
+    };
+  }, [problems]);
 
   // Timeline entries
-  const recentTimeline = [...problems]
-    .sort((a, b) => (b.lastAttemptAt || b.lastOpenedAt) - (a.lastAttemptAt || a.lastOpenedAt))
-    .slice(0, 5);
+  const recentTimeline = useMemo(
+    () =>
+      [...problems]
+        .sort((a, b) => (b.lastAttemptAt || b.lastOpenedAt) - (a.lastAttemptAt || a.lastOpenedAt))
+        .slice(0, 5),
+    [problems]
+  );
 
   return (
     <div className="space-y-5">

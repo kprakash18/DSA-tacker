@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import type { Problem, ProblemDetectedPayload, ToSolveProblem } from "../../shared/types";
 import CurrentViewingCard from "./CurrentViewingCard";
 import DifficultyBadge from "./DifficultyBadge";
@@ -13,7 +14,6 @@ interface DashboardViewProps {
   problems: Problem[];
   toSolveList: ToSolveProblem[];
   onNavigateTab: (tab: "history" | "toSolve" | "stats") => void;
-  onRemoveToSolve: (id: string) => void;
 }
 
 export default function DashboardView({
@@ -27,16 +27,31 @@ export default function DashboardView({
   onNavigateTab,
 }: DashboardViewProps) {
   const total = problems.length;
-  const solved = problems.filter((p) => p.status === "solved").length;
-  const attempted = problems.filter((p) => p.status === "attempted").length;
+
+  const solved = useMemo(
+    () => problems.filter((p) => p.status === "solved").length,
+    [problems]
+  );
+
+  const attempted = useMemo(
+    () => problems.filter((p) => p.status === "attempted").length,
+    [problems]
+  );
 
   // Recent activity: top 5 sorted by lastAttemptAt / lastOpenedAt
-  const recentProblems = [...problems]
-    .sort((a, b) => (b.lastAttemptAt || b.lastOpenedAt) - (a.lastAttemptAt || a.lastOpenedAt))
-    .slice(0, 5);
+  const recentProblems = useMemo(
+    () =>
+      [...problems]
+        .sort((a, b) => (b.lastAttemptAt || b.lastOpenedAt) - (a.lastAttemptAt || a.lastOpenedAt))
+        .slice(0, 5),
+    [problems]
+  );
 
   // To Solve top 3 preview
-  const toSolvePreview = toSolveList.slice(0, 3);
+  const toSolvePreview = useMemo(
+    () => toSolveList.slice(0, 3),
+    [toSolveList]
+  );
 
   return (
     <div className="space-y-4">
