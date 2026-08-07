@@ -9,6 +9,7 @@ export async function handleProblemDetected(
 
   // Cache detected metadata in session storage for service worker hibernation survival
   await chrome.storage.session.set({
+    activeProblem: payload,
     [problemId]: payload,
   });
 

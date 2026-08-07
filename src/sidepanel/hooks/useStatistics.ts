@@ -1,28 +1,31 @@
 import { useEffect, useState } from "react";
-import { getProblems } from "../services/sidebarApi";
-import type { Problem } from "../../shared/types";
+import { getStatistics, type ProblemStatistics } from "../services/sidebarApi";
 
-export function useProblems() {
-  const [problems, setProblems] = useState<Problem[]>([]);
+export function useStatistics() {
+  const [stats, setStats] = useState<ProblemStatistics>({
+    total: 0,
+    solved: 0,
+    attempted: 0,
+  });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let isMounted = true;
 
-    const fetchProblems = () => {
-      getProblems().then((data) => {
+    const fetchStats = () => {
+      getStatistics().then((data) => {
         if (isMounted) {
-          setProblems(data);
+          setStats(data);
           setLoading(false);
         }
       });
     };
 
-    fetchProblems();
+    fetchStats();
 
     const handleStorageChange = (changes: { [key: string]: chrome.storage.StorageChange }) => {
       if (changes.problems) {
-        fetchProblems();
+        fetchStats();
       }
     };
 
@@ -35,7 +38,7 @@ export function useProblems() {
   }, []);
 
   return {
-    problems,
+    stats,
     loading,
   };
 }

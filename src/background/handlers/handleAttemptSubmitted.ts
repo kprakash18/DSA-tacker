@@ -1,4 +1,5 @@
 import { problemRepository } from "../../storage/ProblemRepository";
+import { toSolveRepository } from "../../storage/ToSolveRepository";
 
 import type {
   AttemptSubmittedPayload,
@@ -33,6 +34,7 @@ export async function handleAttemptSubmitted(
       const platform = (metadata?.platform ?? parts[0] ?? "leetcode") as Platform;
       const slug = metadata?.slug ?? parts[1] ?? "";
 
+      const isAccepted = payload.verdict === "accepted";
       const newProblem: Problem = {
         id: payload.problemId,
         platform,
@@ -41,18 +43,26 @@ export async function handleAttemptSubmitted(
         url: metadata?.url ?? `https://leetcode.com/problems/${slug}/`,
         difficulty: metadata?.difficulty ?? "unknown",
         tags: metadata?.tags ?? [],
-        status: "open",
-        attempts: 0,
+        status: isAccepted ? "solved" : "attempted",
+        attempts: 1,
         firstSeenAt: now,
         lastOpenedAt: now,
-        lastAttemptAt: null,
+        lastAttemptAt: now,
+        solvedAt: isAccepted ? now : null,
         notes: "",
       };
 
       await problemRepository.save(newProblem);
+    } else {
+      await problemRepository.updateAttempt(payload.problemId, payload.verdict);
     }
 
-    await problemRepository.updateAttempt(payload.problemId, payload.verdict);
+    // M7.6: Automatic Transition — Remove from To Solve list once attempted/solved
+    if (await toSolveRepository.exists(payload.problemId)) {
+      await toSolveRepository.remove(payload.problemId);
+      logger.info("Automatically removed from To Solve bookmark list:", payload.problemId);
+    }
+
     logger.info("Submission recorded:", {
       problemId: payload.problemId,
       verdict: payload.verdict,

@@ -26,7 +26,31 @@ export class ProblemRepository {
    */
   async getAll(): Promise<Problem[]> {
     const problems = await this.findAll();
-    return Object.values(problems);
+    return Object.values(problems).filter(
+      (p) => p.attempts > 0 && p.status !== ("open" as unknown as ProblemStatus)
+    );
+  }
+  /**
+   * Returns problem statistics (total, solved, attempted).
+   */
+  async getStatistics(): Promise<{ total: number; solved: number; attempted: number }> {
+    const problems = await this.getAll();
+    let solved = 0;
+    let attempted = 0;
+
+    for (const problem of problems) {
+      if (problem.status === "solved") {
+        solved += 1;
+      } else if (problem.status === "attempted") {
+        attempted += 1;
+      }
+    }
+
+    return {
+      total: problems.length,
+      solved,
+      attempted,
+    };
   }
 
   /**

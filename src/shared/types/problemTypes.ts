@@ -1,7 +1,7 @@
 export type Platform = "leetcode" | "gfg";
 
 export type Difficulty = "easy" | "medium" | "hard" | "unknown";
-export type ProblemStatus = "attempted" | "solved" | "revisit" | "open";
+export type ProblemStatus = "attempted" | "solved" | "revisit";
 
 export interface Problem {
   
@@ -27,3 +27,15 @@ export interface Problem {
 }
 
 export type ProblemStore = Record<string, Problem>;
+
+export interface ToSolveProblem {
+  id: string;
+  platform: Platform;
+  slug: string;
+  title: string;
+  difficulty: Difficulty;
+  url: string;
+  createdAt: number;
+}
+
+export type ToSolveStore = Record<string, ToSolveProblem>;
