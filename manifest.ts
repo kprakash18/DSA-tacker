@@ -9,15 +9,28 @@ export default defineManifest({
 
   version: "1.0.0",
 
-  permissions: ["storage", "sidePanel"],
+  permissions: ["storage", "sidePanel", "tabs"],
 
   host_permissions: [
     "https://leetcode.com/*",
     "https://www.geeksforgeeks.org/*",
   ],
 
+  icons: {
+    16: "icons/inactive/icon16.png",
+    32: "icons/inactive/icon32.png",
+    48: "icons/inactive/icon48.png",
+    128: "icons/inactive/icon128.png",
+  },
+
   action: {
     default_title: "Problem Tracker",
+    default_icon: {
+      16: "icons/inactive/icon16.png",
+      32: "icons/inactive/icon32.png",
+      48: "icons/inactive/icon48.png",
+      128: "icons/inactive/icon128.png",
+    },
   },
 
   background: {

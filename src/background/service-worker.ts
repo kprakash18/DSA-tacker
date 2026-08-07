@@ -8,9 +8,11 @@ import { handleAddToSolve } from "./handlers/handleAddToSolve";
 import { handleRemoveFromToSolve } from "./handlers/handleRemoveFromToSolve";
 import { handleGetToSolve } from "./handlers/handleGetToSolve";
 import { handleGetCurrentProblem } from "./handlers/handleGetCurrentProblem";
+import { initTabIconManager } from "./iconManager";
 import { logger } from "../shared/utils/logger";
 
 logger.info("Problem Tracker Background Started");
+initTabIconManager();
 
 chrome.runtime.onMessage.addListener((message: RuntimeMessage, _sender, sendResponse) => {
   (async () => {

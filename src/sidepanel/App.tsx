@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Header from "./components/Header";
 import SearchBar from "./components/SearchBar";
 import StatsBar from "./components/StatsBar";
@@ -16,6 +16,21 @@ function App() {
   const { problems } = useProblems();
   const { currentProblem } = useCurrentProblem();
   const { toSolveList, add, remove } = useToSolve();
+
+  useEffect(() => {
+    let port: chrome.runtime.Port | null = null;
+    chrome.tabs?.query({ active: true, currentWindow: true }).then(([tab]) => {
+      if (tab?.id) {
+        port = chrome.runtime.connect({ name: `SIDEPANEL_${tab.id}` });
+      }
+    }).catch(() => {});
+
+    return () => {
+      if (port) {
+        port.disconnect();
+      }
+    };
+  }, []);
 
   const currentProblemId = currentProblem ? `${currentProblem.platform}:${currentProblem.slug}` : null;
 
