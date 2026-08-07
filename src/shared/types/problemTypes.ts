@@ -1,4 +1,4 @@
-export type Platform = "leetcode" | "gfg";
+export type Platform = "leetcode";
 
 export type Difficulty = "easy" | "medium" | "hard" | "unknown";
 export type ProblemStatus = "attempted" | "solved" | "revisit";

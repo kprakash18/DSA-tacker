@@ -90,7 +90,7 @@ export default function ToSolveView({ toSolveList, onRemove }: ToSolveViewProps)
           title={toSolveList.length === 0 ? "All Caught Up!" : "No matching bookmarks"}
           message={
             toSolveList.length === 0
-              ? "You've cleared your queue. Bookmark problems on LeetCode or GFG to solve them later."
+              ? "You've cleared your queue. Bookmark problems on LeetCode to solve them later."
               : `No bookmarked problems found for difficulty "${filterDifficulty}".`
           }
         />

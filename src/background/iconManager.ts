@@ -21,9 +21,7 @@ export function isSupportedPlatformUrl(url: string | undefined): boolean {
     const host = parsed.hostname.toLowerCase();
     return (
       host === "leetcode.com" ||
-      host.endsWith(".leetcode.com") ||
-      host === "geeksforgeeks.org" ||
-      host.endsWith(".geeksforgeeks.org")
+      host.endsWith(".leetcode.com")
     );
   } catch {
     return false;

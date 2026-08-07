@@ -69,7 +69,7 @@ export default function HistoryView({ problems }: HistoryViewProps) {
           message={
             searchQuery
               ? `No problems match "${searchQuery}". Try a different keyword.`
-              : "Solve or attempt problems on LeetCode / GFG to populate your history."
+              : "Solve or attempt problems on LeetCode to populate your history."
           }
         />
       )}

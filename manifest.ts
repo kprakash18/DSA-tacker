@@ -5,7 +5,7 @@ export default defineManifest({
 
   name: "Problem Tracker",
 
-  description: "Track your LeetCode and GeeksforGeeks problem-solving journey automatically. Bookmark challenges, monitor submission verdicts, and analyze your DSA statistics in a sleek side panel.",
+  description: "Track your LeetCode problem-solving journey automatically. Bookmark challenges, monitor submission verdicts, and analyze your DSA statistics in a sleek side panel.",
 
   version: "1.0.0",
 
@@ -13,7 +13,6 @@ export default defineManifest({
 
   host_permissions: [
     "https://leetcode.com/*",
-    "https://www.geeksforgeeks.org/*",
   ],
 
   icons: {

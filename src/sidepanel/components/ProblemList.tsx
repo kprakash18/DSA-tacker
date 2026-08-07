@@ -25,7 +25,7 @@ export default function ProblemList({ searchQuery = "" }: ProblemListProps) {
     return (
       <EmptyState
         title="No history recorded"
-        message="Solve or attempt problems on LeetCode / GFG to track your progress here."
+        message="Solve or attempt problems on LeetCode to track your progress here."
       />
     );
   }
