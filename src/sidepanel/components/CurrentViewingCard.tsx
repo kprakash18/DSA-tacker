@@ -25,14 +25,14 @@ export default function CurrentViewingCard({
   const isAttempted = historyProblem?.status === "attempted";
 
   return (
-    <div className="rounded-xl border border-blue-200 bg-blue-50/60 p-4 shadow-xs space-y-3">
+    <div className="rounded-xl border border-blue-100 bg-gradient-to-br from-blue-50/80 to-indigo-50/40 p-4 shadow-xs space-y-3">
       {/* Header Eyebrow */}
       <div className="flex items-center justify-between">
-        <span className="text-[11px] font-bold uppercase tracking-wider text-blue-600 flex items-center gap-1">
+        <span className="text-[10px] font-bold uppercase tracking-wider text-blue-600 flex items-center gap-1.5">
           <span className="w-1.5 h-1.5 rounded-full bg-blue-600 animate-pulse"></span>
           Currently Viewing
         </span>
-        <span className="text-[11px] font-semibold text-gray-500 capitalize">
+        <span className="text-[10px] font-semibold text-gray-400 capitalize">
           {currentProblem.platform}
         </span>
       </div>
@@ -40,7 +40,7 @@ export default function CurrentViewingCard({
       {/* Problem Title & Difficulty Badge */}
       <div>
         <div className="flex items-start justify-between gap-2">
-          <h3 className="font-bold text-sm text-gray-900 leading-snug">
+          <h3 className="font-bold text-xs text-gray-900 leading-snug">
             {currentProblem.url ? (
               <a
                 href={currentProblem.url}
@@ -62,11 +62,10 @@ export default function CurrentViewingCard({
 
       {/* Attempt Warning Banner */}
       {isAttempted && historyProblem && (
-        <div className="text-xs font-medium text-amber-800 bg-amber-50 border border-amber-200 rounded-lg p-2.5 flex items-center gap-2">
-          <span className="text-base leading-none">⚠️</span>
-          <span>
-            You've attempted this problem ({historyProblem.attempts}{" "}
-            {historyProblem.attempts === 1 ? "attempt" : "attempts"}).
+        <div className="text-xs font-medium text-amber-800 bg-amber-50/80 border border-amber-200/80 rounded-lg p-2 flex items-center justify-between">
+          <span className="text-[11px]">Previous attempts</span>
+          <span className="text-xs font-bold text-amber-900 bg-amber-100 px-2 py-0.5 rounded-full">
+            {historyProblem.attempts} {historyProblem.attempts === 1 ? "attempt" : "attempts"}
           </span>
         </div>
       )}
@@ -74,23 +73,22 @@ export default function CurrentViewingCard({
       {/* Bookmark / Save Action Row */}
       <div className="pt-1 flex items-center justify-between">
         {isBookmarked ? (
-          <>
-            <span className="text-xs font-semibold text-[#2db55d] flex items-center gap-1">
-              ✓ Saved to To Solve
+          <div className="w-full flex items-center justify-between">
+            <span className="text-xs font-semibold text-emerald-600">
+              Bookmarked in To Solve
             </span>
             <button
               onClick={onRemove}
-              className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50 transition-colors shadow-xs"
+              className="rounded-lg border border-gray-200 bg-white px-3 py-1 text-xs font-semibold text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors shadow-xs"
             >
               Remove
             </button>
-          </>
+          </div>
         ) : (
           <button
             onClick={onAdd}
-            className="w-full rounded-lg bg-blue-600 px-3.5 py-2 text-xs font-bold text-white hover:bg-blue-700 transition-colors shadow-xs flex items-center justify-center gap-1.5"
+            className="w-full rounded-lg bg-blue-600 px-3.5 py-1.5 text-xs font-bold text-white hover:bg-blue-700 active:scale-[0.99] transition-all shadow-xs flex items-center justify-center gap-1.5"
           >
-            <span>☆</span>
             <span>{isAttempted ? "Save to Solve Later" : "Save for Later"}</span>
           </button>
         )}

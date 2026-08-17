@@ -21,13 +21,13 @@ export default function ToSolveView({ toSolveList, onRemove }: ToSolveViewProps)
   return (
     <div className="space-y-4">
       {/* Header bar with pending count & filter toggle */}
-      <div className="flex items-center justify-between bg-white p-3.5 rounded-xl border border-gray-200 shadow-xs">
+      <div className="flex items-center justify-between bg-white p-3.5 rounded-xl border border-gray-100 shadow-xs">
         <div>
-          <h1 className="text-sm font-bold text-gray-900">To Solve Queue</h1>
-          <div className="flex items-center gap-1.5 mt-0.5 text-xs text-gray-500 font-medium">
+          <h2 className="text-xs font-bold text-gray-900">To Solve Queue</h2>
+          <div className="flex items-center gap-1.5 mt-0.5 text-[11px] text-gray-400 font-medium">
             <span
-              className={`w-2 h-2 rounded-full ${
-                toSolveList.length > 0 ? "bg-red-500 animate-pulse" : "bg-gray-300"
+              className={`w-1.5 h-1.5 rounded-full ${
+                toSolveList.length > 0 ? "bg-amber-500 animate-pulse" : "bg-gray-300"
               }`}
             ></span>
             <span>{toSolveList.length} pending</span>
@@ -38,7 +38,7 @@ export default function ToSolveView({ toSolveList, onRemove }: ToSolveViewProps)
         <select
           value={filterDifficulty}
           onChange={(e) => setFilterDifficulty(e.target.value)}
-          className="text-xs font-semibold text-gray-700 bg-gray-100 border border-gray-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+          className="text-xs font-semibold text-gray-600 bg-gray-50 border border-gray-200 rounded-lg px-2.5 py-1 focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer"
         >
           <option value="all">All Difficulties</option>
           <option value="easy">Easy</option>
@@ -49,17 +49,17 @@ export default function ToSolveView({ toSolveList, onRemove }: ToSolveViewProps)
 
       {/* Queue List */}
       {filteredList.length > 0 ? (
-        <div className="space-y-2.5">
+        <div className="space-y-2">
           {filteredList.map((item) => (
             <div
               key={item.id}
               onClick={() => item.url && openProblemTab(item.url)}
-              className="group relative bg-white border border-gray-200 rounded-xl p-3.5 shadow-xs hover:border-blue-300 hover:shadow-md transition-all cursor-pointer flex items-start justify-between gap-3"
+              className="group bg-white border border-gray-100 rounded-xl p-3.5 shadow-xs hover:border-blue-200 hover:shadow-xs transition-all cursor-pointer flex items-start justify-between gap-3"
             >
               <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2 mb-1.5">
+                <div className="flex items-center gap-2 mb-1">
                   <DifficultyBadge difficulty={item.difficulty} />
-                  <span className="text-[11px] font-medium text-gray-400 capitalize">
+                  <span className="text-[10px] font-medium text-gray-400 capitalize">
                     {item.platform}
                   </span>
                 </div>
@@ -77,17 +77,17 @@ export default function ToSolveView({ toSolveList, onRemove }: ToSolveViewProps)
                   e.stopPropagation();
                   onRemove(item.id);
                 }}
-                className="w-7 h-7 flex items-center justify-center rounded-full text-gray-400 hover:bg-red-50 hover:text-red-600 transition-colors shrink-0"
+                className="px-2 py-1 text-[11px] font-semibold rounded-md text-gray-400 hover:bg-gray-100 hover:text-gray-700 transition-colors shrink-0"
               >
-                <span className="material-symbols-outlined text-[18px]">close</span>
+                Remove
               </button>
             </div>
           ))}
         </div>
       ) : (
         <EmptyState
-          icon="done_all"
-          title={toSolveList.length === 0 ? "All Caught Up!" : "No matching bookmarks"}
+          icon="check_circle"
+          title={toSolveList.length === 0 ? "Queue Cleared" : "No matching bookmarks"}
           message={
             toSolveList.length === 0
               ? "You've cleared your queue. Bookmark problems on LeetCode to solve them later."

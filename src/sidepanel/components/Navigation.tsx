@@ -21,25 +21,25 @@ export default function Navigation({ activeTab, onTabChange, toSolveCount }: Nav
   ];
 
   return (
-    <nav className="px-4 pb-2 bg-white border-b border-gray-200 sticky top-12 z-20">
-      <div className="flex p-1 bg-gray-100 rounded-lg gap-1">
+    <nav className="px-4 py-2 bg-white/80 backdrop-blur-md border-b border-gray-100 sticky top-11 z-20">
+      <div className="flex p-1 bg-gray-100/80 rounded-xl gap-1">
         {tabs.map((tab) => {
           const isActive = activeTab === tab.id;
           return (
             <button
               key={tab.id}
               onClick={() => onTabChange(tab.id)}
-              className={`flex-1 py-1.5 px-2 text-center text-xs font-semibold rounded-md transition-all flex items-center justify-center gap-1 ${
+              className={`flex-1 py-1.5 px-2 text-center text-xs font-semibold rounded-lg transition-all duration-200 flex items-center justify-center gap-1 ${
                 isActive
-                  ? "bg-white text-gray-900 shadow-xs"
-                  : "text-gray-600 hover:text-gray-900"
+                  ? "bg-white text-gray-900 shadow-xs font-bold"
+                  : "text-gray-500 hover:text-gray-800"
               }`}
             >
               <span>{tab.label}</span>
               {typeof tab.badge === "number" && tab.badge > 0 && (
                 <span
-                  className={`px-1.5 py-0.5 text-[10px] rounded-full font-bold leading-none ${
-                    isActive ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-700"
+                  className={`px-1.5 py-0.5 text-[9px] rounded-full font-extrabold leading-none ${
+                    isActive ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-600"
                   }`}
                 >
                   {tab.badge}

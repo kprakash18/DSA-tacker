@@ -32,7 +32,7 @@ export default function HistoryView({ problems }: HistoryViewProps) {
 
       {/* Scannable Compact History List */}
       {filteredProblems.length > 0 ? (
-        <div className="bg-white rounded-xl border border-gray-200 divide-y divide-gray-100 shadow-xs overflow-hidden">
+        <div className="bg-white rounded-xl border border-gray-100 divide-y divide-gray-100 shadow-xs overflow-hidden">
           {filteredProblems.map((problem) => (
             <div
               key={problem.id}
@@ -44,10 +44,10 @@ export default function HistoryView({ problems }: HistoryViewProps) {
                   {problem.title}
                 </h3>
                 <div className="flex items-center gap-2 mt-1">
-                  <span className="text-[11px] font-medium text-gray-500 capitalize">
+                  <span className="text-[10px] font-medium text-gray-400 capitalize">
                     {problem.platform}
                   </span>
-                  <span className="w-1 h-1 rounded-full bg-gray-300"></span>
+                  <span className="w-1 h-1 rounded-full bg-gray-200"></span>
                   <DifficultyBadge difficulty={problem.difficulty} />
                 </div>
                 <TopicTags tags={problem.tags} />
