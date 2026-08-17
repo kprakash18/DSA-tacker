@@ -1,8 +1,8 @@
 import { useMemo } from "react";
 import type { Problem } from "../../shared/types";
-import DifficultyBadge from "./DifficultyBadge";
-import StatusIndicator from "./StatusIndicator";
-import { openProblemTab } from "../services/sidebarApi";
+import DifficultyBadge from "../components/DifficultyBadge";
+import StatusIndicator from "../components/StatusIndicator";
+import { openProblemTab } from "../hooks";
 
 interface StatsViewProps {
   problems: Problem[];

@@ -1,9 +1,9 @@
 import { useState } from "react";
 import type { ToSolveProblem } from "../../shared/types";
-import DifficultyBadge from "./DifficultyBadge";
-import TopicTags from "./TopicTags";
-import EmptyState from "./EmptyState";
-import { openProblemTab } from "../services/sidebarApi";
+import DifficultyBadge from "../components/DifficultyBadge";
+import TopicTags from "../components/TopicTags";
+import EmptyState from "../components/EmptyState";
+import { openProblemTab } from "../hooks";
 
 interface ToSolveViewProps {
   toSolveList: ToSolveProblem[];

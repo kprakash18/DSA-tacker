@@ -1,9 +1,9 @@
 import { useMemo } from "react";
 import type { Problem, ProblemDetectedPayload, ToSolveProblem } from "../../shared/types";
-import CurrentViewingCard from "./CurrentViewingCard";
-import DifficultyBadge from "./DifficultyBadge";
-import StatusIndicator from "./StatusIndicator";
-import { openProblemTab } from "../services/sidebarApi";
+import CurrentViewingCard from "../components/CurrentViewingCard";
+import DifficultyBadge from "../components/DifficultyBadge";
+import StatusIndicator from "../components/StatusIndicator";
+import { openProblemTab } from "../hooks";
 
 interface DashboardViewProps {
   currentProblem: ProblemDetectedPayload | null;

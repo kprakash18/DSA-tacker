@@ -1,5 +1,5 @@
 import { startProblemObserver } from "./problemObserver";
-import { startSubmissionTracker } from "./submission/submissionTracker";
+import { startSubmissionTracker } from "./submissionTracker";
 
 startProblemObserver();
 startSubmissionTracker();

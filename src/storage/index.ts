@@ -1,6 +1,6 @@
-import { STORAGE_KEYS } from "../shared/constants/storageKeys";
-import type { Problem, ProblemStore } from "../shared/types";
-import { logger } from "../shared/utils/logger";
+import { STORAGE_KEYS } from "../shared/constants";
+import type { Problem, ProblemStore, ToSolveProblem, ToSolveStore } from "../shared/types";
+import { logger } from "../shared/utils";
 
 export const problemRepository = {
   async findAll(): Promise<ProblemStore> {
@@ -15,25 +15,7 @@ export const problemRepository = {
     );
   },
 
-  async getStatistics(): Promise<{ total: number; solved: number; attempted: number }> {
-    const problems = await this.getAll();
-    let solved = 0;
-    let attempted = 0;
 
-    for (const problem of problems) {
-      if (problem.status === "solved") {
-        solved += 1;
-      } else if (problem.status === "attempted") {
-        attempted += 1;
-      }
-    }
-
-    return {
-      total: problems.length,
-      solved,
-      attempted,
-    };
-  },
 
   async findById(problemId: string): Promise<Problem | null> {
     const problems = await this.findAll();
@@ -46,29 +28,21 @@ export const problemRepository = {
     await chrome.storage.local.set({ [STORAGE_KEYS.PROBLEMS]: problems });
   },
 
-  async updateAttempt(
-    problemId: string,
-    verdict: "accepted" | "failed"
-  ): Promise<void> {
+  async updateAttempt(problemId: string, verdict: "accepted" | "failed"): Promise<void> {
     const problem = await this.findById(problemId);
     if (!problem) {
       logger.warn("Cannot update attempt: Problem not found", problemId);
       return;
     }
-
     const now = Date.now();
     problem.attempts += 1;
     problem.lastAttemptAt = now;
-
     if (verdict === "accepted") {
       problem.status = "solved";
-      if (!problem.solvedAt) {
-        problem.solvedAt = now;
-      }
+      if (!problem.solvedAt) problem.solvedAt = now;
     } else if (verdict === "failed" && problem.status !== "solved") {
       problem.status = "attempted";
     }
-
     await this.save(problem);
   },
 
@@ -78,5 +52,34 @@ export const problemRepository = {
       problem.lastOpenedAt = Date.now();
       await this.save(problem);
     }
+  },
+};
+
+export const toSolveRepository = {
+  async findAll(): Promise<ToSolveStore> {
+    const data = await chrome.storage.local.get(STORAGE_KEYS.TO_SOLVE);
+    return (data[STORAGE_KEYS.TO_SOLVE] as ToSolveStore) ?? {};
+  },
+
+  async getAll(): Promise<ToSolveProblem[]> {
+    const store = await this.findAll();
+    return (Object.values(store) as ToSolveProblem[]).sort((a, b) => b.createdAt - a.createdAt);
+  },
+
+  async add(problem: ToSolveProblem): Promise<void> {
+    const store = await this.findAll();
+    store[problem.id] = problem;
+    await chrome.storage.local.set({ [STORAGE_KEYS.TO_SOLVE]: store });
+  },
+
+  async remove(problemId: string): Promise<void> {
+    const store = await this.findAll();
+    delete store[problemId];
+    await chrome.storage.local.set({ [STORAGE_KEYS.TO_SOLVE]: store });
+  },
+
+  async exists(problemId: string): Promise<boolean> {
+    const store = await this.findAll();
+    return Boolean(store[problemId]);
   },
 };

@@ -1,13 +1,12 @@
 import { useEffect, useState } from "react";
 import Header from "./components/Header";
 import Navigation, { type TabId } from "./components/Navigation";
-import DashboardView from "./components/DashboardView";
-import HistoryView from "./components/HistoryView";
-import ToSolveView from "./components/ToSolveView";
-import StatsView from "./components/StatsView";
-import { useCurrentProblem } from "./hooks/useCurrentProblem";
-import { useProblems } from "./hooks/useProblems";
-import { useToSolve } from "./hooks/useToSolve";
+import DashboardView from "./views/DashboardView";
+import HistoryView from "./views/HistoryView";
+import ToSolveView from "./views/ToSolveView";
+import StatsView from "./views/StatsView";
+import { useCurrentProblem, useProblems, useToSolve } from "./hooks";
+import { formatProblemId } from "../shared/utils";
 
 function App() {
   const [activeTab, setActiveTab] = useState<TabId>("dashboard");
@@ -34,7 +33,7 @@ function App() {
     };
   }, []);
 
-  const currentProblemId = currentProblem ? `${currentProblem.platform}:${currentProblem.slug}` : null;
+  const currentProblemId = currentProblem ? formatProblemId(currentProblem.platform, currentProblem.slug) : null;
 
   const historyProblem = currentProblemId
     ? problems.find((p) => p.id === currentProblemId)

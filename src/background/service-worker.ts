@@ -1,15 +1,14 @@
-import { MESSAGE_TYPES } from "../shared/messages";
-import type { RuntimeMessage, Problem, Platform, ProblemDetectedPayload, AttemptSubmittedPayload } from "../shared/types";
-import { problemRepository } from "../storage/ProblemRepository";
-import { toSolveRepository } from "../storage/ToSolveRepository";
+import { MESSAGE_TYPES } from "../shared/constants";
+import type { RuntimeMessage, Problem, ProblemDetectedPayload, AttemptSubmittedPayload } from "../shared/types";
+import { problemRepository, toSolveRepository } from "../storage";
 import { initTabIconManager } from "./iconManager";
-import { logger } from "../shared/utils/logger";
+import { logger, formatProblemId, parseProblemId } from "../shared/utils";
 
 logger.info("Problem Tracker Background Started");
 initTabIconManager();
 
 async function handleProblemDetected(payload: ProblemDetectedPayload): Promise<void> {
-  const problemId = `${payload.platform}:${payload.slug}`;
+  const problemId = formatProblemId(payload.platform, payload.slug);
   await chrome.storage.session.set({
     activeProblem: payload,
     [problemId]: payload,
@@ -32,9 +31,9 @@ async function handleAttemptSubmitted(payload: AttemptSubmittedPayload): Promise
         metadata = (sessionStore[payload.problemId] as ProblemDetectedPayload) ?? null;
       }
       const now = Date.now();
-      const parts = payload.problemId.split(":");
-      const platform = (metadata?.platform ?? parts[0] ?? "leetcode") as Platform;
-      const slug = metadata?.slug ?? parts[1] ?? "";
+      const parsed = parseProblemId(payload.problemId);
+      const platform = metadata?.platform ?? parsed.platform;
+      const slug = metadata?.slug ?? parsed.slug;
       const isAccepted = payload.verdict === "accepted";
       const newProblem: Problem = {
         id: payload.problemId,
@@ -73,17 +72,13 @@ chrome.runtime.onMessage.addListener((message: RuntimeMessage, _sender, sendResp
           sendResponse(await problemRepository.getAll());
           break;
 
-        case MESSAGE_TYPES.GET_STATISTICS:
-          sendResponse(await problemRepository.getStatistics());
-          break;
-
         case MESSAGE_TYPES.GET_TO_SOLVE:
           sendResponse(await toSolveRepository.getAll());
           break;
 
         case MESSAGE_TYPES.ADD_TO_SOLVE:
           await toSolveRepository.add({
-            id: `${message.payload.platform}:${message.payload.slug}`,
+            id: formatProblemId(message.payload.platform, message.payload.slug),
             ...message.payload,
             createdAt: Date.now(),
           });
