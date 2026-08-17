@@ -1,54 +1,103 @@
 import { MESSAGE_TYPES } from "../shared/messages";
-import type { RuntimeMessage } from "../shared/types";
-import { handleProblemDetected } from "./handlers/handleProblemDetected";
-import { handleAttemptSubmitted } from "./handlers/handleAttemptSubmitted";
-import { handleGetProblems } from "./handlers/handleGetProblems";
-import { handleGetStatistics } from "./handlers/handleGetStatistics";
-import { handleAddToSolve } from "./handlers/handleAddToSolve";
-import { handleRemoveFromToSolve } from "./handlers/handleRemoveFromToSolve";
-import { handleGetToSolve } from "./handlers/handleGetToSolve";
-import { handleGetCurrentProblem } from "./handlers/handleGetCurrentProblem";
+import type { RuntimeMessage, Problem, Platform, ProblemDetectedPayload, AttemptSubmittedPayload } from "../shared/types";
+import { problemRepository } from "../storage/ProblemRepository";
+import { toSolveRepository } from "../storage/ToSolveRepository";
 import { initTabIconManager } from "./iconManager";
 import { logger } from "../shared/utils/logger";
 
 logger.info("Problem Tracker Background Started");
 initTabIconManager();
 
+async function handleProblemDetected(payload: ProblemDetectedPayload): Promise<void> {
+  const problemId = `${payload.platform}:${payload.slug}`;
+  await chrome.storage.session.set({
+    activeProblem: payload,
+    [problemId]: payload,
+  });
+  const existing = await problemRepository.findById(problemId);
+  if (existing) {
+    await problemRepository.updateLastOpened(problemId);
+  }
+}
+
+async function handleAttemptSubmitted(payload: AttemptSubmittedPayload): Promise<void> {
+  if (!payload?.problemId || !payload?.verdict) return;
+
+  try {
+    const existing = await problemRepository.findById(payload.problemId);
+    if (!existing) {
+      let metadata = payload.metadata ?? null;
+      if (!metadata) {
+        const sessionStore = await chrome.storage.session.get(payload.problemId);
+        metadata = (sessionStore[payload.problemId] as ProblemDetectedPayload) ?? null;
+      }
+      const now = Date.now();
+      const parts = payload.problemId.split(":");
+      const platform = (metadata?.platform ?? parts[0] ?? "leetcode") as Platform;
+      const slug = metadata?.slug ?? parts[1] ?? "";
+      const isAccepted = payload.verdict === "accepted";
+      const newProblem: Problem = {
+        id: payload.problemId,
+        platform,
+        slug,
+        title: metadata?.title ?? slug,
+        url: metadata?.url ?? `https://leetcode.com/problems/${slug}/`,
+        difficulty: metadata?.difficulty ?? "unknown",
+        tags: metadata?.tags ?? [],
+        status: isAccepted ? "solved" : "attempted",
+        attempts: 1,
+        firstSeenAt: now,
+        lastOpenedAt: now,
+        lastAttemptAt: now,
+        solvedAt: isAccepted ? now : null,
+        notes: "",
+      };
+      await problemRepository.save(newProblem);
+    } else {
+      await problemRepository.updateAttempt(payload.problemId, payload.verdict);
+    }
+
+    if (await toSolveRepository.exists(payload.problemId)) {
+      await toSolveRepository.remove(payload.problemId);
+    }
+  } catch (error) {
+    logger.error("Failed to record submission attempt:", error);
+  }
+}
+
 chrome.runtime.onMessage.addListener((message: RuntimeMessage, _sender, sendResponse) => {
   (async () => {
     try {
       switch (message.type) {
-        case MESSAGE_TYPES.GET_PROBLEMS: {
-          const problems = await handleGetProblems();
-          sendResponse(problems);
+        case MESSAGE_TYPES.GET_PROBLEMS:
+          sendResponse(await problemRepository.getAll());
           break;
-        }
 
-        case MESSAGE_TYPES.GET_STATISTICS: {
-          const stats = await handleGetStatistics();
-          sendResponse(stats);
+        case MESSAGE_TYPES.GET_STATISTICS:
+          sendResponse(await problemRepository.getStatistics());
           break;
-        }
 
-        case MESSAGE_TYPES.GET_TO_SOLVE: {
-          const list = await handleGetToSolve();
-          sendResponse(list);
+        case MESSAGE_TYPES.GET_TO_SOLVE:
+          sendResponse(await toSolveRepository.getAll());
           break;
-        }
 
         case MESSAGE_TYPES.ADD_TO_SOLVE:
-          await handleAddToSolve(message.payload);
+          await toSolveRepository.add({
+            id: `${message.payload.platform}:${message.payload.slug}`,
+            ...message.payload,
+            createdAt: Date.now(),
+          });
           sendResponse();
           break;
 
         case MESSAGE_TYPES.REMOVE_FROM_TO_SOLVE:
-          await handleRemoveFromToSolve(message.payload);
+          await toSolveRepository.remove(message.payload.problemId);
           sendResponse();
           break;
 
         case MESSAGE_TYPES.GET_CURRENT_PROBLEM: {
-          const current = await handleGetCurrentProblem();
-          sendResponse(current);
+          const session = await chrome.storage.session.get("activeProblem");
+          sendResponse((session.activeProblem as ProblemDetectedPayload) ?? null);
           break;
         }
 
@@ -63,7 +112,6 @@ chrome.runtime.onMessage.addListener((message: RuntimeMessage, _sender, sendResp
           break;
 
         default:
-          logger.warn("Unknown message:", (message as { type: string }).type);
           sendResponse();
           break;
       }

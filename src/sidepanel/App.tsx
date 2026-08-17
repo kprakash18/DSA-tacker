@@ -18,13 +18,16 @@ function App() {
 
   useEffect(() => {
     let port: chrome.runtime.Port | null = null;
+    let isMounted = true;
+
     chrome.tabs?.query({ active: true, currentWindow: true }).then(([tab]) => {
-      if (tab?.id) {
+      if (isMounted && tab?.id) {
         port = chrome.runtime.connect({ name: `SIDEPANEL_${tab.id}` });
       }
     }).catch(() => {});
 
     return () => {
+      isMounted = false;
       if (port) {
         port.disconnect();
       }

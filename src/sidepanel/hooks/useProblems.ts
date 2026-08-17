@@ -5,17 +5,12 @@ import { STORAGE_KEYS } from "../../shared/constants/storageKeys";
 
 export function useProblems() {
   const [problems, setProblems] = useState<Problem[]>([]);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let isMounted = true;
-
     const fetchProblems = () => {
       getProblems().then((data) => {
-        if (isMounted) {
-          setProblems(data);
-          setLoading(false);
-        }
+        if (isMounted) setProblems(data);
       });
     };
 
@@ -38,8 +33,5 @@ export function useProblems() {
     };
   }, []);
 
-  return {
-    problems,
-    loading,
-  };
+  return { problems };
 }

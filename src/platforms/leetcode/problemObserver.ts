@@ -58,90 +58,50 @@ function detectProblem(): boolean {
   return true;
 }
 
-let isHistoryPatched = false;
+export function startProblemObserver() {
+  let timeoutId: number | undefined;
+  let lastCheckedHref = "";
 
-function patchHistoryMethods(): void {
-  if (isHistoryPatched) {
-    return;
+  function check(): void {
+    const currentHref = window.location.href;
+    if (currentHref !== lastCheckedHref) {
+      lastCheckedHref = currentHref;
+      const metadata = extractProblemMetadata();
+      if (metadata?.slug && metadata.slug !== lastProblemSlug) {
+        lastProblemSlug = null;
+      }
+    }
+    detectProblem();
   }
 
-  isHistoryPatched = true;
-
-  const originalPushState = history.pushState;
-  const originalReplaceState = history.replaceState;
-
-  history.pushState = function (...args) {
-    originalPushState.apply(this, args);
-    window.dispatchEvent(new Event("locationchange"));
-  };
-
-  history.replaceState = function (...args) {
-    originalReplaceState.apply(this, args);
-    window.dispatchEvent(new Event("locationchange"));
-  };
-}
-
-export function startProblemObserver() {
-  patchHistoryMethods();
-
-  let timeoutId: number | undefined;
-  let isObserving = false;
-
+  // Observe DOM for asynchronous rendering of problem details
   const observer = new MutationObserver(() => {
     window.clearTimeout(timeoutId);
-
-    timeoutId = window.setTimeout(() => {
-      const isComplete = detectProblem();
-      if (isComplete && isObserving) {
-        observer.disconnect();
-        isObserving = false;
-      }
-    }, 100);
+    timeoutId = window.setTimeout(check, 150);
   });
 
-  function startObserving() {
-    const isComplete = detectProblem();
-    if (!isComplete && !isObserving) {
-      observer.observe(document.body, {
-        childList: true,
-        subtree: true,
-      });
-      isObserving = true;
-    }
+  const targetNode = document.body || document.documentElement;
+  if (targetNode) {
+    observer.observe(targetNode, {
+      childList: true,
+      subtree: true,
+    });
   }
 
-  startObserving();
+  // Periodic fallback check for SPA navigation in case DOM mutations are subtle
+  const urlCheckInterval = window.setInterval(check, 500);
 
-  const onLocationChange = () => {
-    startObserving();
-  };
+  window.addEventListener("popstate", check);
+  window.addEventListener("focus", check);
 
-  const onFocus = () => {
-    if (location.pathname.startsWith("/problems/")) {
-      const metadata = extractProblemMetadata();
-      if (metadata && metadata.title.trim() !== "" && metadata.difficulty !== "unknown") {
-        currentProblemId = `${metadata.platform}:${metadata.slug}`;
-        currentProblemMetadata = metadata;
-        lastProblemSlug = metadata.slug;
-        safeSendMessage({
-          type: MESSAGE_TYPES.PROBLEM_DETECTED,
-          payload: metadata,
-        });
-      }
-    }
-  };
-
-  window.addEventListener("popstate", onLocationChange);
-  window.addEventListener("locationchange", onLocationChange);
-  window.addEventListener("focus", onFocus);
+  // Initial check
+  check();
 
   return () => {
-    window.removeEventListener("popstate", onLocationChange);
-    window.removeEventListener("locationchange", onLocationChange);
-    window.removeEventListener("focus", onFocus);
-    if (isObserving) {
-      observer.disconnect();
-      isObserving = false;
-    }
+    window.clearTimeout(timeoutId);
+    window.clearInterval(urlCheckInterval);
+    observer.disconnect();
+    window.removeEventListener("popstate", check);
+    window.removeEventListener("focus", check);
   };
 }

@@ -17,34 +17,73 @@ function extractSlug(): string | null {
 }
 
 function extractTitle(slug: string): string {
-  const anchor = document.querySelector<HTMLAnchorElement>(
-    `a[href="/problems/${slug}/"]`,
-  );
+  const anchor =
+    document.querySelector<HTMLAnchorElement>(`a[href="/problems/${slug}/"]`) ||
+    document.querySelector<HTMLAnchorElement>(`a[href="/problems/${slug}"]`) ||
+    document.querySelector<HTMLAnchorElement>(`a[href*="/problems/${slug}"]`);
 
-  if (!anchor) {
-    return "";
+  if (anchor?.textContent?.trim()) {
+    return anchor.textContent.trim().replace(/^\d+\.\s*/, "");
   }
 
-  const text = anchor.textContent?.trim() ?? "";
+  const titleEl =
+    document.querySelector<HTMLElement>('[data-cy="question-title"]') ||
+    document.querySelector<HTMLElement>('div[class*="text-title-large"]') ||
+    document.querySelector<HTMLElement>('span[class*="text-title-large"]');
 
-  return text.replace(/^\d+\.\s*/, "");
+  if (titleEl?.textContent?.trim()) {
+    return titleEl.textContent.trim().replace(/^\d+\.\s*/, "");
+  }
+
+  const docTitle = document.title.split(" - LeetCode")[0]?.trim();
+  if (docTitle && docTitle !== "LeetCode") {
+    return docTitle.replace(/^\d+\.\s*/, "");
+  }
+
+  return slug
+    .split("-")
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
 }
 
 function extractDifficulty(): Difficulty {
-  const elements = document.querySelectorAll<HTMLElement>("div");
+  const selectors = [
+    'div[class*="text-olive"]',
+    'div[class*="text-yellow"]',
+    'div[class*="text-pink"]',
+    'div[class*="text-emerald"]',
+    'div[class*="text-amber"]',
+    'div[class*="text-rose"]',
+    'div[class*="text-difficulty"]',
+    'span[class*="text-olive"]',
+    'span[class*="text-yellow"]',
+    'span[class*="text-pink"]',
+    'span[class*="text-emerald"]',
+    'span[class*="text-amber"]',
+    'span[class*="text-rose"]',
+  ];
 
-  for (const element of Array.from(elements)) {
-    const text = element.textContent?.trim();
+  for (const selector of selectors) {
+    const el = document.querySelector(selector);
+    const text = el?.textContent?.trim().toLowerCase();
+    if (text === "easy") return "easy";
+    if (text === "medium") return "medium";
+    if (text === "hard") return "hard";
+  }
 
-    switch (text) {
-      case "Easy":
-        return "easy";
+  const container =
+    document.querySelector("#qd-content") ||
+    document.querySelector("main") ||
+    document.body;
 
-      case "Medium":
-        return "medium";
-
-      case "Hard":
-        return "hard";
+  if (container) {
+    const elements = container.querySelectorAll<HTMLElement>("div, span");
+    const limit = Math.min(elements.length, 100);
+    for (let i = 0; i < limit; i++) {
+      const text = elements[i].textContent?.trim().toLowerCase();
+      if (text === "easy") return "easy";
+      if (text === "medium") return "medium";
+      if (text === "hard") return "hard";
     }
   }
 

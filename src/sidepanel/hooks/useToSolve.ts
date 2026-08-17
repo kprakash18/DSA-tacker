@@ -1,26 +1,16 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { getToSolve, addToSolve, removeFromToSolve } from "../services/sidebarApi";
-import type { AddToSolvePayload, ToSolveProblem } from "../../shared/types";
+import type { ToSolveProblem } from "../../shared/types";
 import { STORAGE_KEYS } from "../../shared/constants/storageKeys";
 
 export function useToSolve() {
   const [toSolveList, setToSolveList] = useState<ToSolveProblem[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  const fetchList = useCallback(async () => {
-    const data = await getToSolve();
-    setToSolveList(data);
-    setLoading(false);
-  }, []);
 
   useEffect(() => {
     let isMounted = true;
     const fetchToSolve = () => {
       getToSolve().then((data) => {
-        if (isMounted) {
-          setToSolveList(data);
-          setLoading(false);
-        }
+        if (isMounted) setToSolveList(data);
       });
     };
 
@@ -43,19 +33,9 @@ export function useToSolve() {
     };
   }, []);
 
-  const add = async (payload: AddToSolvePayload) => {
-    await addToSolve(payload);
-  };
-
-  const remove = async (problemId: string) => {
-    await removeFromToSolve(problemId);
-  };
-
   return {
     toSolveList,
-    loading,
-    add,
-    remove,
-    refetch: fetchList,
+    add: addToSolve,
+    remove: removeFromToSolve,
   };
 }

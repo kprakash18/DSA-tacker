@@ -2,24 +2,11 @@ import { MESSAGE_TYPES } from "../../shared/messages";
 import type { AddToSolvePayload, Problem, ProblemDetectedPayload, ToSolveProblem } from "../../shared/types";
 import { safeSendMessage } from "../../shared/utils/safeSendMessage";
 
-export interface ProblemStatistics {
-  total: number;
-  solved: number;
-  attempted: number;
-}
-
 export async function getProblems(): Promise<Problem[]> {
   const problems = await safeSendMessage<Problem[]>({
     type: MESSAGE_TYPES.GET_PROBLEMS,
   });
   return problems ?? [];
-}
-
-export async function getStatistics(): Promise<ProblemStatistics> {
-  const stats = await safeSendMessage<ProblemStatistics>({
-    type: MESSAGE_TYPES.GET_STATISTICS,
-  });
-  return stats ?? { total: 0, solved: 0, attempted: 0 };
 }
 
 export async function getToSolve(): Promise<ToSolveProblem[]> {
