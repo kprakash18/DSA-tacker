@@ -5,7 +5,7 @@ export default defineManifest({
 
   name: "Problem Tracker",
 
-  description: "Track your LeetCode problem-solving journey automatically. Bookmark challenges, monitor submission verdicts, and view DSA statistics.",
+  description: "Track your LeetCode problem-solving automatically. Bookmark challenges, monitor submission verdicts, and view DSA statistics.",
 
   version: "1.0.0",
 
