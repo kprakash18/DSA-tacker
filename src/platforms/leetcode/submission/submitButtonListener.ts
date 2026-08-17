@@ -21,6 +21,14 @@ export function attachSubmitListener(onSubmitTrigger: () => void): void {
   if (!activeKeydownListener) {
     activeKeydownListener = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+        const target = e.target as HTMLElement | null;
+        if (
+          target instanceof HTMLInputElement ||
+          target instanceof HTMLTextAreaElement ||
+          target?.isContentEditable
+        ) {
+          return;
+        }
         if (location.pathname.startsWith("/problems/")) {
           onSubmitTrigger();
         }

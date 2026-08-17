@@ -62,7 +62,19 @@ export function startProblemObserver() {
   let timeoutId: number | undefined;
   let lastCheckedHref = "";
 
+  function cleanup(): void {
+    window.clearTimeout(timeoutId);
+    window.clearInterval(urlCheckInterval);
+    observer.disconnect();
+    window.removeEventListener("popstate", check);
+    window.removeEventListener("focus", check);
+  }
+
   function check(): void {
+    if (!chrome.runtime?.id) {
+      cleanup();
+      return;
+    }
     const currentHref = window.location.href;
     if (currentHref !== lastCheckedHref) {
       lastCheckedHref = currentHref;
@@ -97,11 +109,5 @@ export function startProblemObserver() {
   // Initial check
   check();
 
-  return () => {
-    window.clearTimeout(timeoutId);
-    window.clearInterval(urlCheckInterval);
-    observer.disconnect();
-    window.removeEventListener("popstate", check);
-    window.removeEventListener("focus", check);
-  };
+  return cleanup;
 }

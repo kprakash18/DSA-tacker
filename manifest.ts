@@ -9,7 +9,7 @@ export default defineManifest({
 
   version: "1.0.0",
 
-  permissions: ["storage", "sidePanel", "tabs"],
+  permissions: ["storage", "sidePanel"],
 
   host_permissions: [
     "https://leetcode.com/*",

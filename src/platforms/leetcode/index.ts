@@ -1,5 +1,14 @@
 import { startProblemObserver } from "./problemObserver";
 import { startSubmissionTracker } from "./submission/submissionTracker";
 
-startProblemObserver();
-startSubmissionTracker();
+const stopProblemObserver = startProblemObserver();
+const submissionTracker = startSubmissionTracker();
+
+window.addEventListener(
+  "beforeunload",
+  () => {
+    stopProblemObserver();
+    submissionTracker.dispose();
+  },
+  { once: true }
+);

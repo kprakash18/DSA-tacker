@@ -34,6 +34,11 @@ export function startSubmissionTracker(): SubmissionTracker {
   }
 
   function checkVerdict(): void {
+    if (!chrome.runtime?.id) {
+      dispose();
+      return;
+    }
+
     if (!waitingForVerdict) {
       return;
     }

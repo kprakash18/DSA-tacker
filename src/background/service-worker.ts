@@ -6,6 +6,9 @@ import { initTabIconManager } from "./iconManager";
 import { logger } from "../shared/utils/logger";
 
 logger.info("Problem Tracker Background Started");
+if (chrome.storage?.session?.setAccessLevel) {
+  chrome.storage.session.setAccessLevel({ accessLevel: "TRUSTED_AND_UNTRUSTED_CONTEXTS" }).catch(() => {});
+}
 initTabIconManager();
 
 async function handleProblemDetected(payload: ProblemDetectedPayload): Promise<void> {

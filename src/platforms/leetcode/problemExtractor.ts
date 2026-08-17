@@ -13,7 +13,8 @@ function extractSlug(): string | null {
     return null;
   }
 
-  return segments[problemsIndex + 1];
+  const slug = segments[problemsIndex + 1]?.trim();
+  return slug && slug !== "" ? slug : null;
 }
 
 function extractTitle(slug: string): string {
