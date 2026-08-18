@@ -43,7 +43,7 @@ A lightweight, high-performance Google Chrome extension (Manifest V3) built with
 
 ### Option 1: Chrome Web Store (Recommended)
 
-👉 [**Install from Chrome Web Store**](#) *(Coming soon)*
+👉 [**Install from Chrome Web Store**](#) 👉 [link](https://chromewebstore.google.com/detail/problem-tracker/lgefnafbconohdolbklkfaeeghelacop)
 
 ---
 
